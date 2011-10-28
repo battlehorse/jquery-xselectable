@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+  <title>jQuery xselectable :: Maps scrolling demo</title>
+  <link rel="stylesheet" type="text/css" href="../shared/demos.css">
+  <style>
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: sans-serif;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-size: 0.9em;
+    }
+
+    H1 {
+      font-size: 1em;
+    }
+
+    #controls {
+      width: 28%;
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    #map_canvas {
+      width: 70%;
+      height: 100%;
+      border: 1px solid transparent;
+      border-right: 1px solid #b9b9b9;
+      -webkit-box-shadow: 3px 0 3px rgba(0, 0, 0, 0.2);
+      -moz-box-shadow: 3px 0 3px rgba(0, 0, 0, 0.2);
+      box-shadow: 3px 0 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #map_canvas.toggled {
+      border: 1px solid #b0281a;
+    }
+
+    #map_canvas .mapControl {
+      margin: 0.5em;
+      z-index: 1200;
+      position: absolute;
+      top: 0;
+      right: 0;
+      -webkit-box-shadow: 0 0 3px 2px rgba(255, 255, 255, 0.3);
+      -moz-box-shadow: 0 0 3px 2px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 3px 2px rgba(255, 255, 255, 0.3);
+      -moz-transition-property: all;
+      -moz-transition-duration: 0.15s;
+      -webkit-transition-property: all;
+      -webkit-transition-duration: 0.15s;
+      -o-transition-property: all;
+      -o-transition-duration: 0.15s; 
+    }
+
+    #map_canvas.toggled .mapControl,
+    #map_canvas .mapControl:hover {
+      -webkit-box-shadow: 0 0 3px 4px rgba(255, 255, 255, 0.5);
+      -moz-box-shadow: 0 0 3px 4px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 3px 4px rgba(255, 255, 255, 0.5);
+    }
+
+    .marker { 
+      position: absolute;
+      background-image: url('marker.png');
+      width: 32px;
+      height: 37px;
+      margin-left: -16px;
+      margin-top: -37px;
+    }
+
+    .marker.xselectable-selected {
+      background-image: url('marker-selected.png');
+    }
+
+    .xselectable-glass {
+      background-color: transparent;
+      z-index: 1000;
+      cursor: hand;
+      cursor: pointer;
+    }
+
+    .xselectable-box {
+      border: 1px dotted black;
+      background-color: rgba(255, 255, 255, 0.5);
+      cursor: hand;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="../../xselectable.js"></script>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+  <script type="text/javascript">
+    $().ready(function() {
+
+      function SelectablesOverlay(map) {
+        this.markers_ = [];
+        this.protoMarker_ = $('<div />', {'class': 'marker'});
+        this.setMap(map);
+      }
+      SelectablesOverlay.prototype = new google.maps.OverlayView();
+
+      SelectablesOverlay.prototype.addMarker = function(latlng, address) {
+        var marker = this.protoMarker_.clone().
+          data({'latlng': latlng, 'address': address});
+        this.markers_.push(marker);
+        this.getPanes().overlayLayer.appendChild(marker.get(0));
+      }
+
+      SelectablesOverlay.prototype.draw = function() {
+        var overlayProjection = this.getProjection();
+
+        for (var i = 0; i < this.markers_.length; i++) {
+          var latlng = this.markers_[i].data('latlng');
+          var pos = overlayProjection.fromLatLngToDivPixel(latlng);
+          this.markers_[i].css({'top': pos.y, 'left': pos.x});
+        }
+      };
+
+      var latlng = new google.maps.LatLng(51.516, -0.111);
+      var mapOpts = {
+        zoom: 4,
+        center: latlng,
+        mapTypeId: google.maps.MapTypeId.TERRAIN,
+        streetViewControl: false,
+        mapTypeControl: false
+      };
+      var map = new google.maps.Map(document.getElementById("map_canvas"), mapOpts);
+      var overlay = new SelectablesOverlay(map);
+
+      $('#map_canvas').xselectable({
+          disabled: true,
+          filter: '.marker',
+          scroller: function(el) {
+            var offset = {
+              'top' : 0,
+              'left': 0
+            };
+            
+            return {
+              getScrollableDistances: function() {
+                return [
+                  Number.MAX_VALUE, Number.MAX_VALUE,
+                  Number.MAX_VALUE, Number.MAX_VALUE
+                ];
+              },
+              scroll: function(axis, shift) {
+                if (axis == 'vertical') {
+                  map.panBy(0, shift);
+                  offset.top -= shift;
+                } else {
+                  map.panBy(shift, 0);
+                  offset.left -= shift;
+                }
+              },
+              getScrollOffset: function() {
+                return offset;
+              }
+            }
+          },
+          positioner: function(el) {
+            var pos = overlay.getProjection().fromLatLngToContainerPixel($(el).data('latlng'));
+            return {
+              'top': pos.y - 37,
+              'left': pos.x - 16,
+              'width': el.offsetWidth,
+              'height': el.offsetHeight
+            }
+          }
+      }).bind('xselectablestart', function() {
+        $('#selectedList').children().remove();
+      }).bind('xselectableselecting', function(ev, ui) {
+        var li = $('<li />').text($(ui.selected).data('address')).appendTo(
+          $('#selectedList'));
+        $(ui.selected).data('listItem', li);
+      }).bind('xselectableunselecting', function(ev, ui) {
+        $(ui.unselected).data('listItem').remove();
+      });
+
+      var mapControl = $(
+        '<div />', {'class': 'mapControl'}).
+        append($('<input type="button" class="button" value="Start Selecting" />').
+          click(function() { 
+            var selectionState = $('#map_canvas').xselectable('option', 'disabled');
+            $('#map_canvas').
+              xselectable('option', 'disabled', !selectionState).
+              toggleClass('toggled');
+
+            map.setOptions({'draggable': !selectionState});
+            if ($(this).val() == 'Start Selecting') {
+              $(this).val('Stop Selecting');
+            } else {
+              $(this).val('Start Selecting');
+            }
+          })).appendTo($('#map_canvas'));
+
+      var geocoder = new google.maps.Geocoder();
+      $('#geocode').submit(function(evt) {
+        geocoder.geocode({ 'address': $('#address').val()}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            overlay.addMarker(
+                results[0].geometry.location,
+                results[0].formatted_address);
+            map.setCenter(results[0].geometry.location);
+            overlay.draw();
+            $('#address').val('');
+          } else {
+            alert("Geocode was not successful for the following reason: " + status);
+          }
+        });
+        evt.preventDefault();
+      });
+
+      $('#add_random').click(function(evt) {
+        var centroid = {
+          lat: Math.random() * 120 - 60,
+          lng: Math.random() * 360 - 180
+        }, sw = {
+          lat: Number.MAX_VALUE,
+          lng: Number.MAX_VALUE
+        }, ne = {
+          lat: Number.MIN_VALUE,
+          lng: Number.MIN_VALUE
+        };
+
+        for (var i = 0; i < 10; i++) {
+          var lat = centroid.lat + Math.random()*20;
+          var lng = centroid.lng + Math.random()*30;
+
+          sw.lat = Math.min(sw.lat, lat);
+          sw.lng = Math.min(sw.lng, lng);
+
+          ne.lat = Math.max(ne.lat, lat);
+          ne.lng = Math.max(ne.lng, lng);
+
+          overlay.addMarker(
+            new google.maps.LatLng(lat, lng), 
+            "Lat: " + lat.toFixed(2) + ", Lng: " + lng.toFixed(2));
+        }
+        map.fitBounds(new google.maps.LatLngBounds(
+            new google.maps.LatLng(sw.lat, sw.lng),
+            new google.maps.LatLng(ne.lat, ne.lng)
+        ));
+        overlay.draw();
+        evt.preventDefault();    
+      });
+
+    });
+  </script> 
+</head>
+<body>
+  <div id="map_canvas"></div>
+  <div id="controls">
+    <h1>Step 1: Add Markers</h1>
+    <form id="geocode">
+      <input type="text" id="address" placeholder="Enter an address">
+      <input class="button secondary" type="submit" value="Add Marker">
+    </form>
+    <p>or <a href="#" id="add_random">add a few random ones</a>.</p>
+    <h1>Step 2: Select them</h1>
+    <p>
+      Click the red 'Start Selecting' button and draw selection boxes over the
+      map to select your markers.
+    </p>
+    <p>
+      Try moving the selection box toward the map borders and see how the
+      map correctly scrolls in the desired direction, while continuing the
+      select operation.
+    </p>
+    <p>
+      Try zooming and panning to different locations, and see how the selection
+      process remains accurate.
+    </p>
+    <p>You selected:</p>
+    <ul id="selectedList">
+    </ul>
+  </div>
+</body>
+</html>
