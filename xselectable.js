@@ -103,6 +103,9 @@
     // should trigger scrolling.
     scrollingThreshold: 100,
 
+    // A multiplier to increase/decrease scrolling speed.
+    scrollSpeedMultiplier: 1,
+
     // Custom scroller implementation. If null, the default one is used.
     // If provided, it must be a function that accepts the element upon which
     // the plugin is applied and returns an object implementing the required
@@ -313,7 +316,8 @@
         data = $this.data(pluginName),
         scroller = data.scroller,
         containerDimensions = data.containerDimensions,
-        threshold = data.options.scrollingThreshold;
+        threshold = data.options.scrollingThreshold,
+        scrollSpeedMultiplier = data.options.scrollSpeedMultiplier;
 
     if (data.scrollingTimeout) {
       window.clearTimeout(data.scrollingTimeout);
@@ -383,7 +387,7 @@
         // border, the bigger the shift.
         var shift = metric.direction *
             Math.min(available, Math.ceil((threshold - metric.distance) / 10)) *
-            scrollLagMultiplier;
+            scrollLagMultiplier * scrollSpeedMultiplier;
 
         // Scroll in the desired direction
         scroller.scroll(metric.scrollAxis, shift);
