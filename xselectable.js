@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2011 Riccardo Govoni
-  
+
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
   "Software"), to deal in the Software without restriction, including
@@ -8,10 +8,10 @@
   distribute, sublicense, and/or sell copies of the Software, and to
   permit persons to whom the Software is furnished to do so, subject to
   the following conditions:
-  
+
   The above copyright notice and this permission notice shall be
   included in all copies or substantial portions of the Software.
-  
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -19,7 +19,7 @@
   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/ 
+*/
 
 /*
  * A jQuery plugin that mimics jQuery UI 'selectable' (see
@@ -47,7 +47,7 @@
  * same. While it's fairly straightforward to replace jQuery UI plugin for
  * this, this pluging is not 100% compatible drop-in replacement due to a number
  * of differences:
- * 
+ *
  * - The plugin deals only with box-selection. Single element selection by
  *   clicking on a selectable element must be implemented externally.
  *
@@ -77,7 +77,7 @@
  * documentation and demos.
  */
 (function ( $, window, document, undefined ) {
-  
+
   var pluginName = 'xselectable';
 
   /**
@@ -86,11 +86,11 @@
    */
   var defaultOptions = {
 
-    // Tolerance, in pixels, for when selecting should start. If specified, 
+    // Tolerance, in pixels, for when selecting should start. If specified,
     // selecting will not start until after mouse is dragged beyond distance.
     distance: 0,
 
-    // Whether the selectable behavior is enabled or not. 
+    // Whether the selectable behavior is enabled or not.
     disabled: false,
 
     // Prevents selecting if you start on elements matching the selector.
@@ -241,7 +241,7 @@
   var createSelectionBox = function() {
     var $this = $(this),
         data = $this.data(pluginName);
-            
+
     data.selectionGlass = $(
       '<div />', {'class': pluginName + '-glass'}).css({
       'position': 'absolute',
@@ -276,7 +276,7 @@
     }).removeClass(pluginName + '-selected');
     data.selectables = selectables;
   };
- 
+
   /**
    * Updates the selection box position and sizing to match the distance
    * travelled from the position where the selection gesture started and
@@ -285,11 +285,11 @@
   var updateSelectionBox = function(evt) {
     var data = $(this).data(pluginName);
     data.selectionBoxExtents = {
-      'top': 
+      'top':
           Math.min(data.startPosition.pageY, evt.pageY) -
-          data.containerDimensions.top + 
+          data.containerDimensions.top +
           this.scrollTop,
-      'left': 
+      'left':
           Math.min(data.startPosition.pageX, evt.pageX) -
           data.containerDimensions.left +
           this.scrollLeft,
@@ -302,8 +302,13 @@
   /**
    * Triggers the selection container viewport scrolling, if the selection
    * box is being dragged too close to the viewport borders.
+   *
+   * @param {!Event} evt The last mousemove event received.
+   * @param {number?} scrollTimestamp The timestamp at which the last scrolling
+   *     operation was performed. Undefined if a mouse movement occurred in
+   *     between.
    */
-  var updateViewportScrolling = function(evt) {
+  var updateViewportScrolling = function(evt, scrollTimestamp) {
     var $this = $(this),
         data = $this.data(pluginName),
         scroller = data.scroller,
@@ -312,7 +317,7 @@
 
     if (data.scrollingTimeout) {
       window.clearTimeout(data.scrollingTimeout);
-      data.scrollingTimeout = undefined;
+      delete data.scrollingTimeout;
     }
 
     var scrollMetrics = [
@@ -356,21 +361,29 @@
       if (
           // We are within a minimum threshold distance from the border, and
           metric.distance < threshold &&
-          
+
           // We still have room for scrolling, and
-          available > 0 && 
+          available > 0 &&
 
             // We are moving toward the border
             sign(
                 data.curPosition[metric.positionProperty] -
-                data.lastPosition[metric.positionProperty])
-                    == metric.direction
+                data.lastPosition[metric.positionProperty]) ==
+                    metric.direction
         ) {
+
+        // Compute a multiplier based on the actual amount of time that
+        // passed since the last scrolling update, to keep scrolling speed
+        // constant as if scrolling occurred at exactly 60fps.
+        var scrollLagMultiplier = scrollTimestamp ?
+            (new Date().getTime() - scrollTimestamp) / 16 : 1;
+        scrollTimestamp = new Date().getTime();
 
         // Compute the scrolling shift: the closer we push the mouse toward the
         // border, the bigger the shift.
         var shift = metric.direction *
-            Math.min(available, Math.ceil((threshold - metric.distance) / 10));
+            Math.min(available, Math.ceil((threshold - metric.distance) / 10)) *
+            scrollLagMultiplier;
 
         // Scroll in the desired direction
         scroller.scroll(metric.scrollAxis, shift);
@@ -389,11 +402,11 @@
     // speed).
     if (scrolled) {
       data.scrollingTimeout = window.setTimeout($.proxy(
-          function() { onMouseMove.call(this, evt); }, this),
-          50);
+          function() { tick.call(this, evt, scrollTimestamp); }, this),
+          16);  // try to keep scrolling at 60fps.
     }
   };
-  
+
 
   /**
    * Update the selection status of all selectable elements', depending on
@@ -423,16 +436,16 @@
             {'unselected': selectable.element});
       }
     }
-  }
-  
+  };
+
   var overlap = function(rectangle1, rectangle2, offset) {
     return (
       overlap1D(rectangle1.top, rectangle1.height,
                 rectangle2.top + offset.top, rectangle2.height) &&
       overlap1D(rectangle1.left, rectangle1.width,
                 rectangle2.left + offset.left, rectangle2.width));
-  }
-  
+  };
+
   var overlap1D = function(start1, width1, start2, width2) {
     var end1 = start1 + width1, end2 = start2 + width2;
     return ((start2 >= start1 && start2 <= end1) ||
@@ -447,16 +460,16 @@
   var onMouseDown = function(evt) {
     var $this = $(this),
         data = $this.data(pluginName);
-    
+
     // Do not start selection if it's not done with the left button.
     if (evt.which != 1) {
       return;
     }
-    
+
     // Prevent selection from starting on any element matched by
     // or contained within the selector specified by the 'cancel'
     // option.
-    var selector = 
+    var selector =
         [data.options.cancel, data.options.cancel + ' *'].join(',');
     if (!!data.options.cancel &&
         $(evt.target).is(selector)) {
@@ -472,7 +485,7 @@
 
     // Trigger the selection 'start' event.
     $this.trigger(pluginName + 'start');
-    
+
     // Record the initial position of the container, with respect to the
     // document. Also include the current border size (assuming equal
     // top/bottom and right/left border sizes).
@@ -495,60 +508,67 @@
     data.scroller =
         (data.options.scroller || defaultScroller).call(this, this);
 
-    // Start listening for mouseup (to terminate selection), movement and 
+    // Start listening for mouseup (to terminate selection), movement and
     // wheel scrolling. Mouseups and movement can occur everywhere in the
     // document, if the user moves the mouse outside the selection container.
     data.mouseupHandler = $.proxy(onMouseUp, this);
     $(document).bind('mouseup.' + pluginName, data.mouseupHandler);
-    $(document).bind('mousemove.' + pluginName, $.proxy(onMouseMove, this));
-    
+    $(document).bind('mousemove.' + pluginName, $.proxy(tick, this));
+
     // Disable mousewheel scrolling during box selections.
     $this.bind('mousewheel.' + pluginName, function(evt) {
       evt.preventDefault(); return false;
     });
-    
+
     // Prevent the default browser dragging to occur.
     evt.preventDefault();
   };
- 
+
   /**
-   * Reacts to the user dragging the mouse to during a selection operation.
+   * Updates the plugin state during a selection operation in response either to
+   * mouse dragging by the user, or repeated scrolling updates because the
+   * selection box is skimming the scrolling container viewport borders.
+   *
+   * @param {!Event} evt The last mousemove event received.
+   * @param {number?} scrollTimestamp The timestamp at which the last scrolling
+   *     operation was performed. Undefined if this function is being invoked
+   *     in response to mouse dragging.
    */
-  var onMouseMove = function(evt) {
+  var tick = function(evt, scrollTimestamp) {
     var $this = $(this),
         data = $this.data(pluginName),
         distance = data.options.distance;
-        
+
     // Do nothing if we haven't yet moved past the distance threshold.
     if (!data.selectionBox &&
         Math.abs(data.startPosition.pageX - evt.pageX) < distance &&
         Math.abs(data.startPosition.pageY - evt.pageY) < distance) {
       return;
     }
-    
+
     data.lastPosition = data.curPosition;
     data.curPosition = {'pageX': evt.pageX, 'pageY': evt.pageY};
 
     if (!data.selectionBox) {
       // Create the selection box if we haven't created it yet.
       createSelectionBox.apply(this);
-      
+
       // Compute the initial position and sizing of each selectable
       // object.
       initSelectablesOnGestureStart.apply(this);
     }
 
     // scroll the viewport if the mouse moves near the viewport boundaries.
-    updateViewportScrolling.call(this, evt);
-      
+    updateViewportScrolling.call(this, evt, scrollTimestamp);
+
     // update the selection box position and size.
     updateSelectionBox.call(this, evt);
-    
+
     // mark elements as selected / deselected based on the current
     // selection box extent.
     markSelected.call(this);
   };
-  
+
   /**
    * Terminates a selection gesture.
    */
@@ -558,27 +578,27 @@
 
     if (data.scrollingTimeout) {
       window.clearTimeout(data.scrollingTimeout);
-      data.scrollingTimeout = undefined;
+      delete data.scrollingTimeout;
     }
 
     $this.unbind('mousewheel.' + pluginName);
     $(document).unbind('mousemove.' + pluginName);
     $(document).unbind('mouseup.' + pluginName, data.mouseupHandler);
     data.mouseupHandler = undefined;
-    
+
     if (!!data.selectionBox) {
       data.selectionBox.remove();
-      delete data['selectionBox'];
-      
+      delete data.selectionBox;
+
       data.selectionGlass.remove();
-      delete data['selectionGlass'];
-    
+      delete data.selectionGlass;
+
       var selected = [], unselected = [];
       for (var i = data.selectables.length - 1; i >= 0; i--) {
         (data.selectables[i].selected ? selected : unselected).push(
             data.selectables[i].element);
       }
-      delete data['selectables'];
+      delete data.selectables;
 
       // If selection ever started (we moved past the threshold distance),
       // fire the completion events.
@@ -587,7 +607,7 @@
       $this.trigger(pluginName + 'stop');
     }
   };
-  
+
   // Public plugin methods.
   var methods = {
 
@@ -651,7 +671,7 @@
      * a getter.
      *
      * @param {string} key The option key to get or set.
-     * @param {Object=} opt_value If undefined, the method will act as a 
+     * @param {Object=} opt_value If undefined, the method will act as a
      *     getter, otherwise the option value will be set to the given one
      *     (null values may be used to reset certain properties to their
      *     default status).
@@ -665,17 +685,17 @@
       } else {
         options[key] = opt_value;
         if (key == 'disabled') {
-          (!!opt_value) ? 
+          (!!opt_value) ?
               methods.disable.apply(this) : methods.enable.apply(this);
         }
         return this;
       }
     }
   };
-  
+
   // Method dispatcher.
   $.fn[pluginName] = function( method ) {
-    
+
     if ( methods[method] ) {
       return methods[ method ].apply(
           this, Array.prototype.slice.call( arguments, 1 ));
@@ -683,7 +703,7 @@
       return methods.init.apply( this, arguments );
     } else {
       $.error('Method ' +  method + ' does not exist on jQuery.' + pluginName);
-    }    
-  
+    }
+
   };
 })(jQuery, window, document);
