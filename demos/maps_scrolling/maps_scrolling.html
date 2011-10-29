@@ -55,7 +55,7 @@
       -webkit-transition-property: all;
       -webkit-transition-duration: 0.15s;
       -o-transition-property: all;
-      -o-transition-duration: 0.15s; 
+      -o-transition-duration: 0.15s;
     }
 
     #map_canvas.toggled .mapControl,
@@ -65,7 +65,7 @@
       box-shadow: 0 0 3px 4px rgba(255, 255, 255, 0.5);
     }
 
-    .marker { 
+    .marker {
       position: absolute;
       background-image: url('marker.png');
       width: 32px;
@@ -141,7 +141,7 @@
               'top' : 0,
               'left': 0
             };
-            
+
             return {
               getScrollableDistances: function() {
                 return [
@@ -185,7 +185,7 @@
       var mapControl = $(
         '<div />', {'class': 'mapControl'}).
         append($('<input type="button" class="button" value="Start Selecting" />').
-          click(function() { 
+          click(function() {
             var selectionState = $('#map_canvas').xselectable('option', 'disabled');
             $('#map_canvas').
               xselectable('option', 'disabled', !selectionState).
@@ -239,7 +239,7 @@
           ne.lng = Math.max(ne.lng, lng);
 
           overlay.addMarker(
-            new google.maps.LatLng(lat, lng), 
+            new google.maps.LatLng(lat, lng),
             "Lat: " + lat.toFixed(2) + ", Lng: " + lng.toFixed(2));
         }
         map.fitBounds(new google.maps.LatLngBounds(
@@ -247,11 +247,11 @@
             new google.maps.LatLng(ne.lat, ne.lng)
         ));
         overlay.draw();
-        evt.preventDefault();    
+        evt.preventDefault();
       });
 
     });
-  </script> 
+  </script>
 </head>
 <body>
   <div id="map_canvas"></div>
