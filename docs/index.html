@@ -128,7 +128,7 @@
           It behaves similarly to <a href="http://jqueryui.com/demos/selectable/">
           jQuery UI 'selectable'</a>, but it offers a few extra features,
           such as support for scrollable containers and selection over Flash
-          embeds.
+          embeds. See <a href="#features">Features</a>.
           </p>
           <p><small>I haven't spent a huge amount of time trying to customize
           jQuery UI 'selectable' behavior, so you may still be able to have it
@@ -426,6 +426,73 @@ $('#container').xselectable({
             <h2>Methods</h2>
           </div>
         </div>
+        <div class="row">
+          <div class="span16">
+            <p>
+            After initialization, you can invoke different methods on the plugin:
+            </p>
+            <table class="zebra-striped">
+              <tr>
+                <th>Method name</th>
+                <th style="width: 300px">Description</th>
+                <th>Example</th>
+              </tr>
+              <tr>
+                <td><code>enable</code></td>
+                <td>
+                  Enables selection gestures.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable('enable');</pre>
+                  <p>
+                  <span class="label notice">Tip</span> You can achieve the same
+                  via <code>.xselectable('option', 'disabled', false);</code>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td><code>disable</code></td>
+                <td>
+                  Disables selection gestures.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable('disable');</pre>
+                  <p>
+                  <span class="label notice">Tip</span> You can achieve the same
+                  via <code>.xselectable('option', 'disabled', true);</code>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td><code>option</code></td>
+                <td>
+                  Gets or sets any selectable option. If no value is specified,
+                  will act as a getter.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable('option', 'distance', 10);
+var distance = $('#container').xselectable('option', 'distance');</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>destroy</code></td>
+                <td>
+                  Deactives the plugin on the given set of elements, clearing
+                  any additional data structures and event listeners created
+                  in the process, reverting the affected elements to their
+                  original state.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable('destroy');</pre>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
       </section>
 
       <section id="events">
@@ -671,6 +738,13 @@ $('#container').xselectable().bind(
         <div class="row">
           <div class="page-header span16">
             <h2>Sources</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span16">
+            You can download, contribute, fork or study the plugin sources
+            at <a href="https://github.com/battlehorse/jquery-xselectable">
+            https://github.com/battlehorse/jquery-xselectable</a>.
           </div>
         </div>
       </section>
