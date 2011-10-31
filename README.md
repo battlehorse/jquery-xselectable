@@ -15,7 +15,7 @@ It behaves similarly to [jQuery UI 'selectable'](http://jqueryui.com/demos/selec
 
 ## Demos and documentation
 
-
+See all the [Demos and Documentation here](http://battlehorse.github.com/jquery-xselectable/)
 
 ## License
 
