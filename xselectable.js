@@ -39,6 +39,9 @@
  *   browser scrolling functionality). For example, a Google Maps-like endless
  *   scrolling can be easily implemented.
  *
+ * - Selection does not inadvertently trigger when the mouse down event
+ *   occurs over scrollbars. See http://bugs.jqueryui.com/ticket/4441.
+ *
  * - The plugin doesn't require any of jQuery UI machinery, but can be used
  *   directly on top of jQuery, possibly reducing the javascript payload used in
  *   the hosting page.
@@ -99,7 +102,7 @@
     // The matching child elements will be made able to be selected.
     filter: '*',
 
-    // The minimum distance, in pixels, from the selectable container that
+    // The minimum pixel distance, from the selectable container border that
     // should trigger scrolling.
     scrollingThreshold: 100,
 
