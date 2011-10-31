@@ -206,7 +206,7 @@
       getScrollableDistances: getScrollableDistances,
       scroll: scroll,
       getScrollOffset: getScrollOffset
-    }
+    };
   };
 
   /**
@@ -237,7 +237,7 @@
 
   var sign = function(i) {
     return i > 0 ? 1 : i < 0 ? -1 : 0;
-  }
+  };
 
   /**
    * Creates the selection box and the glass panel that isolates selectable
@@ -277,7 +277,7 @@
       var selectable =
         (data.options.positioner || defaultPositioner).call(self, this);
       selectable.element = this;
-      selectable.selected = false
+      selectable.selected = false;
       selectables.push(selectable);
     }).removeClass(pluginName + '-selected');
     data.selectables = selectables;
@@ -361,6 +361,13 @@
     var scrolled = false;
     var scrollableDistances = scroller.getScrollableDistances();
 
+    // Compute a multiplier based on the actual amount of time that
+    // passed since the last scrolling update, to keep scrolling speed
+    // constant as if scrolling occurred at exactly 60fps.
+    var scrollLagMultiplier = scrollTimestamp ?
+        (new Date().getTime() - scrollTimestamp) / 16 : 1;
+    scrollTimestamp = new Date().getTime();
+
     for (var i = scrollMetrics.length - 1; i >= 0; i--) {
       var metric = scrollMetrics[i];
       var available = scrollableDistances[i];
@@ -378,13 +385,6 @@
                 data.lastPosition[metric.positionProperty]) ==
                     metric.direction
         ) {
-
-        // Compute a multiplier based on the actual amount of time that
-        // passed since the last scrolling update, to keep scrolling speed
-        // constant as if scrolling occurred at exactly 60fps.
-        var scrollLagMultiplier = scrollTimestamp ?
-            (new Date().getTime() - scrollTimestamp) / 16 : 1;
-        scrollTimestamp = new Date().getTime();
 
         // Compute the scrolling shift: the closer we push the mouse toward the
         // border, the bigger the shift.
