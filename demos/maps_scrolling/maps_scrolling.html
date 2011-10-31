@@ -165,9 +165,9 @@
       }).bind('xselectableselecting', function(ev, ui) {
         var li = $('<li />').text($(ui.selected).data('address')).appendTo(
           $('#selectedList'));
-        $(ui.selected).data('listItem', li);
+        $(ui.selecting).data('listItem', li);
       }).bind('xselectableunselecting', function(ev, ui) {
-        $(ui.unselected).data('listItem').remove();
+        $(ui.unselecting).data('listItem').remove();
       });
 
       var mapControl = $(
