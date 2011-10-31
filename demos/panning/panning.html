@@ -1,7 +1,139 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
+  <title>jQuery xselectable :: Scrollable demo</title>
+  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
+  <style>
+    html {
+      overflow-y: auto;
+    }
+
+    body {
+      height: 400px;
+      margin: 0 auto;
+    }
+
+    .viewport {
+      position: relative;
+      overflow: hidden;
+      max-width: 1200px;
+      height: 400px;
+    }
+
+    .universe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 900px;
+      width: 1200px;
+    }
+
+    .box {
+      width: 50px;
+      height: 50px;
+      background-image: url(burj_al_arab.jpg);
+      background-repeat: no-repeat;
+      overflow: hidden;
+      opacity: 0.2;
+    }
+
+    .box.xselectable-selected {
+      opacity: 1;
+    }
+
+    .xselectable-glass {
+      background-color: transparent;
+      z-index: 100;
+      cursor: hand;
+      cursor: pointer;
+    }
+
+    .xselectable-box {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: hand;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="../../xselectable.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    $().ready(function() {
+      
+      // Fill the selectable container with 50x50 blocks, each one showing a
+      // chunk of the background image.
+      var width = $('#universe').width(),
+          height = $('#universe').height();
+      var x = 0, y = 0, side = 50;
+      while (y < height) {
+        var box = $('<div />', {'id': 'box_' + x + '_' + y, 'class': 'box'}).css({
+          'position': 'absolute',
+          'top': y + 'px',
+          'left': x + 'px',
+          'background-position': '' + (-x) + 'px ' + (-y) + 'px'
+        }).appendTo($('#universe'));
+        if (x + side >= width) {
+          x = 0;
+          y += side;
+        } else {
+          x += side;
+        }
+      }
+            
+      // Compute the available scrolling distance in each direction, based
+      // one the dimension of the background image and the dimension of the
+      // container viewport.
+      var available = {
+        'top' : 0,
+        'left': 0,
+        'bottom': 500,
+        'right': $('#universe').width() - $('#viewport').width()
+      };      
+
+      // Activate the selectable plugin, along with a custom scroller that
+      // pans the background image accordingly when scrolling is required.
+      $('.viewport').xselectable({
+        'filter': '.box',
+        'distance': 2,
+        'scroller': function(el) {
+
+          return {
+            getScrollableDistances: function() {
+              console.log(available);
+              return [
+                available.top, available.right, available.bottom, available.left
+              ];
+            },
+            scroll: function(axis, shift) {
+              // shift is negative when scrolling top (content must shift bottom)
+              shift = Math.round(shift);
+              if (axis == 'vertical') {
+                $('#universe').css('top',
+                  parseInt($('#universe').css('top'), 10) - shift);
+                available.bottom -= shift;
+                available.top += shift;
+              } else if (axis == 'horizontal') {
+                $('#universe').css('left',
+                  parseInt($('#universe').css('left'), 10) - shift);
+                available.right -= shift;
+                available.left += shift;
+              }
+            },
+            getScrollOffset: function() {
+              return {
+                top: parseInt($('#universe').css('top'), 10),
+                left: parseInt($('#universe').css('left'), 10)
+              };
+            }
+          };
+        }
+      });
+    });
+  </script>
 </head>
 <body>
+  <div class="viewport" id="viewport" unselectable="on">
+    <div class="universe" id="universe" unselectable="on">
+    </div>
+  </div>
 </body>
 </html>

@@ -560,6 +560,10 @@ $('#container').xselectable().bind(
         <div class="row">
           <div class="page-header span16">
             <h2>Demos</h2>
+            <p>
+              <span class="label warning">Warning</span>
+              The demos have not been optimized for IE8. Some may not fully work.
+            </p>
           </div>
         </div>
         <div class="row">
@@ -597,6 +601,45 @@ $('#container').xselectable().bind(
         </div>
         <div class="row">
           <div class="span10">
+            <iframe src="../demos/scrollbar/scrollbar.html" style="height: 400px"></iframe>
+          </div>
+          <div class="span6">
+            <h4>Scrolling</h4>
+            <p>
+            This demo shows how scrolling is triggered when the selection box
+            gets closer to the selectable container border. Notice how scrolling
+            speed increases the closer the mouse is to the border.
+            </p>
+            <p>
+              Open in a separate window:
+              <a href="../demos/scrollbar/scrollbar.html" target="_blank">scrollbar.html</a>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <iframe src="../demos/panning/panning.html" style="height: 400px"></iframe>
+          </div>
+          <div class="span6">
+            <h4>Panning</h4>
+            <p>
+            Like the one above, this demo demonstrates scrolling but, instead of
+            rely on native browser scrolling, emulates scrolling by using
+            positioning offsets and a custom plugin <code>scroller</code>.
+            </p>
+            <p>
+            Try dragging a selection box and see how the background is scrolled
+            when the selection box gets closer to the selectable container
+            border.
+            </p>
+            <p>
+              Open in a separate window:
+              <a href="../demos/panning/panning.html" target="_blank">panning.html</a>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
             <iframe src="../demos/maps_scrolling/maps_scrolling.html" style="height: 500px"></iframe>
           </div>
           <div class="span6">
@@ -614,6 +657,7 @@ $('#container').xselectable().bind(
             <p>
               Try zooming and panning to different locations, and see how the
               selection process remains accurate.
+            </p>
             <p>
               Open in a separate window:
               <a href="../demos/maps_scrolling/maps_scrolling.html" target="_blank">maps_scrolling.html</a>
