@@ -430,14 +430,14 @@
           selectable.selected = true;
           $this.trigger(
               pluginName + 'selecting',
-              {'selected': selectable.element});
+              {'selecting': selectable.element});
         }
       } else if (selectable.selected) {
         $(selectable.element).removeClass(pluginName + '-selected');
         selectable.selected = false;
         $this.trigger(
             pluginName + 'unselecting',
-            {'unselected': selectable.element});
+            {'unselecting': selectable.element});
       }
     }
   };
