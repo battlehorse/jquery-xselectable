@@ -2,17 +2,22 @@
 <html>
 <head>
   <title>jQuery xselectable :: Flash demo</title>
-  <link rel="stylesheet" type="text/css" href="../shared/demos.css">
+  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
   <style>
+    html {
+      overflow-y: auto;
+    }
+
     #container {
       position: relative;
-      width: 340px;
+      cursor: crosshair;
+      width: 500px;
     }
 
     #selection {
       position: absolute;
       left: 350px;
-      top: 0;
+      top: 1em;
     }
 
     .swf {
@@ -49,6 +54,7 @@
   <script src="../../xselectable.js"></script>
   <script type="text/javascript" charset="utf-8">
     $().ready(function() {
+      // Create a set of sample Flash embeds.
       var container = $('#container');
       for (var j = 0; j < 2; j++) {
         for (var i = 0; i < 2; i++) {
@@ -65,12 +71,12 @@
           };
           var atts = { id: embedid };
           swfobject.embedSWF(
-            "http://edmullen.net/flash/relog.swf",
-            embedid, "150", "150", "8", null, null, params, atts);
+            "clock.swf", embedid, "150", "150", "8", null, null, params, atts);
         }
       }
 
-      $('body').xselectable({filter: '.swf'}).
+      // Configure the selectable plugin.
+      $('#container').xselectable({filter: '.swf'}).
         bind('xselectablestart', function() {
           $('ul').children().remove();
         }).bind('xselectableselecting', function(ev, ui) {
@@ -83,11 +89,12 @@
   </script>
 </head>
 <body>
-  <div id="container"></div>
-  <div id="selection">
-    <p>You selected:</p>
-    <ul>
-    </ul>
+  <div id="container">
+    <div id="selection">
+      <p>You selected:</p>
+      <ul>
+      </ul>
+    </div>
   </div>
 </body>
 </html>

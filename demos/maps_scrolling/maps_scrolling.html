@@ -2,21 +2,31 @@
 <html>
 <head>
   <title>jQuery xselectable :: Maps scrolling demo</title>
-  <link rel="stylesheet" type="text/css" href="../shared/demos.css">
+  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
   <style>
+    html {
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    body {
+      height: 98%;
+    }
+
     H1 {
       font-size: 1em;
+      margin-bottom: 5px;
     }
 
     #controls {
-      width: 28%;
+      width: 38%;
       position: absolute;
       top: 0;
       right: 0;
     }
 
     #map_canvas {
-      width: 70%;
+      width: 60%;
       height: 100%;
       border: 1px solid transparent;
       border-right: 1px solid #b9b9b9;
@@ -86,6 +96,9 @@
   <script type="text/javascript">
     $().ready(function() {
 
+      // Define a map overlay that will contain the markers added by the
+      // user to the map. We use a custom overlay to be able to use our own
+      // <div /> tags for markers, so we can make them selectable.
       function SelectablesOverlay(map) {
         this.markers_ = [];
         this.protoMarker_ = $('<div />', {'class': 'marker'});
@@ -93,6 +106,7 @@
       }
       SelectablesOverlay.prototype = new google.maps.OverlayView();
 
+      // Adds a marker to the overlay.
       SelectablesOverlay.prototype.addMarker = function(latlng, address) {
         var marker = this.protoMarker_.clone().
           data({'latlng': latlng, 'address': address});
@@ -100,6 +114,8 @@
         this.getPanes().overlayLayer.appendChild(marker.get(0));
       }
 
+      // Draws all the markers on the overlay, converting each latlng
+      // position into the correct pixel coordinates.
       SelectablesOverlay.prototype.draw = function() {
         var overlayProjection = this.getProjection();
 
@@ -110,7 +126,8 @@
         }
       };
 
-      var latlng = new google.maps.LatLng(51.516, -0.111);
+      // Initialize the Google Map.
+      var latlng = new google.maps.LatLng(51.516, -0.111);  // London
       var mapOpts = {
         zoom: 4,
         center: latlng,
@@ -121,9 +138,17 @@
       var map = new google.maps.Map(document.getElementById("map_canvas"), mapOpts);
       var overlay = new SelectablesOverlay(map);
 
+      // Make the map selectable.
       $('#map_canvas').xselectable({
+
+          // Selection is initially disabled.
           disabled: true,
+
+          // Make all map markers selectable
           filter: '.marker',
+
+          // Define a custom scroller that will work together with the
+          // underyling Google Map
           scroller: function(el) {
             var offset = {
               'top' : 0,
@@ -131,12 +156,16 @@
             };
 
             return {
+
+              // The map is scrollable limitless in all directions
               getScrollableDistances: function() {
                 return [
                   Number.MAX_VALUE, Number.MAX_VALUE,
                   Number.MAX_VALUE, Number.MAX_VALUE
                 ];
               },
+
+              // Scroll the underlying map when a scroll request is received.
               scroll: function(axis, shift) {
                 if (axis == 'vertical') {
                   map.panBy(0, shift);
@@ -146,40 +175,58 @@
                   offset.left -= shift;
                 }
               },
+
+              // Keep track of how far we have scrolled, so that overlaps
+              // between the selection box and selectable markers can be
+              // computed accordingly.
               getScrollOffset: function() {
                 return offset;
               }
             }
           },
+
+          // Define a custom positioner. Returns the correct pixel positions
+          // of selectable markers, with respect to the current map projection.
           positioner: function(el) {
-            var pos = overlay.getProjection().fromLatLngToContainerPixel($(el).data('latlng'));
+            var pos = overlay.getProjection().fromLatLngToContainerPixel(
+              $(el).data('latlng'));
             return {
-              'top': pos.y - 37,
-              'left': pos.x - 16,
+              'top': pos.y - 37,  // 37=vertical offset of the marker icon
+                                  //    to have it point to the exact latlng
+                                  //    coordinate the marker points to
+              'left': pos.x - 16,  // 16=horizontal offset of the marker icon
+                                   //    to have it point to the exact latlng
+                                   //    coordinate the marker points to
               'width': el.offsetWidth,
               'height': el.offsetHeight
             }
           }
+
+      // Bind a few events to keep track of selected items.
       }).bind('xselectablestart', function() {
         $('#selectedList').children().remove();
       }).bind('xselectableselecting', function(ev, ui) {
-        var li = $('<li />').text($(ui.selected).data('address')).appendTo(
+        var li = $('<li />').text($(ui.selecting).data('address')).appendTo(
           $('#selectedList'));
         $(ui.selecting).data('listItem', li);
       }).bind('xselectableunselecting', function(ev, ui) {
         $(ui.unselecting).data('listItem').remove();
       });
 
+      // Add a button onto the map to switch between panning and selection mode.
       var mapControl = $(
         '<div />', {'class': 'mapControl'}).
-        append($('<input type="button" class="button" value="Start Selecting" />').
+        append($('<input type="button" class="btn danger" value="Start Selecting" />').
           click(function() {
+
+            // Toggle between selection and panning mode.
             var selectionState = $('#map_canvas').xselectable('option', 'disabled');
             $('#map_canvas').
               xselectable('option', 'disabled', !selectionState).
               toggleClass('toggled');
-
             map.setOptions({'draggable': !selectionState});
+
+            // Update the button text
             if ($(this).val() == 'Start Selecting') {
               $(this).val('Stop Selecting');
             } else {
@@ -187,6 +234,7 @@
             }
           })).appendTo($('#map_canvas'));
 
+      // Let the user add markers to the map based on addresses of his choice.
       var geocoder = new google.maps.Geocoder();
       $('#geocode').submit(function(evt) {
         geocoder.geocode({ 'address': $('#address').val()}, function(results, status) {
@@ -204,6 +252,7 @@
         evt.preventDefault();
       });
 
+      // Let the user add random markers to the map.
       $('#add_random').click(function(evt) {
         var centroid = {
           lat: Math.random() * 120 - 60,
@@ -246,23 +295,14 @@
   <div id="controls">
     <h1>Step 1: Add Markers</h1>
     <form id="geocode">
-      <input type="text" id="address" placeholder="Enter an address">
-      <input class="button secondary" type="submit" value="Add Marker">
+      <input type="text" id="address" placeholder="Enter an address" class="span2">
+      <input class="btn primary" type="submit" value="Add Marker">
     </form>
     <p>or <a href="#" id="add_random">add a few random ones</a>.</p>
     <h1>Step 2: Select them</h1>
     <p>
       Click the red 'Start Selecting' button and draw selection boxes over the
       map to select your markers.
-    </p>
-    <p>
-      Try moving the selection box toward the map borders and see how the
-      map correctly scrolls in the desired direction, while continuing the
-      select operation.
-    </p>
-    <p>
-      Try zooming and panning to different locations, and see how the selection
-      process remains accurate.
     </p>
     <p>You selected:</p>
     <ul id="selectedList">

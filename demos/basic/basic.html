@@ -2,8 +2,17 @@
 <html>
 <head>
   <title>jQuery xselectable :: Basic demo</title>
-  <link rel="stylesheet" type="text/css" href="../shared/demos.css">
+  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
   <style>
+    html {
+      overflow-y: auto;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
     .xselectable-glass {
       background-color: transparent;
       z-index: 1000;
@@ -18,55 +27,40 @@
       cursor: pointer;
     }
 
-    ul {
+    ul.demo {
+      cursor: crosshair;
       position: relative;
+      margin: 1em;
+      padding: 1em;
     }
 
-    li {
+    ul.demo li {
+      width: 60%;
       list-style-type: none;
-      margin: 0.5em;
-      padding-left: 0.5em;
-      line-height: 24px;
-      height: 24px;
-      width: 10em;
-      color: #fff;
-      text-shadow: 0 1px rgba(0, 0, 0, 0.1);
-      background-color: #4D90FE;
-      background-image: -webkit-gradient(linear, left top, left bottom, from(#4d90fe), to(#4787ed));
-      background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed);
-      background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
-      background-image: -ms-linear-gradient(top,#4d90fe,#4787ed);
-      background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
-      background-image: linear-gradient(top,#4d90fe,#4787ed);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe', EndColorStr='#4787ed'); /* IE6–IE9 */
-      border: 1px solid transparent;
+      background-color: #eee;
+      border: 1px solid #b9b9b9;
       -moz-border-radius: 2px;
       -webkit-border-radius: 2px;
       border-radius: 2px;
-      -webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-      -moz-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-      -moz-transition-property: all;
-      -moz-transition-duration: 0.15s;
-      -webkit-transition-property: all;
-      -webkit-transition-duration: 0.15s;
-      -o-transition-property: all;
-      -o-transition-duration: 0.15s;
+      padding: 0.5em;
+      margin: 0.5em;
     }
 
-    li.xselectable-selected {
-      width: 12em;
-      background-color: #d14836;
-      background-image: -webkit-gradient(linear, left top, left bottom, from(#dd4b39), to(#d14836));
-      background-image: -webkit-linear-gradient(top,#dd4b39,#d14836);
-      background-image: -moz-linear-gradient(top,#dd4b39,#d14836);
-      background-image: -ms-linear-gradient(top,#dd4b39,#d14836);
-      background-image: -o-linear-gradient(top,#dd4b39,#d14836);
-      background-image: linear-gradient(top,#dd4b39,#d14836);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#dd4b39', EndColorStr='#d14836'); /* IE6–IE9 */
-      -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
-      -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
-      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    ul.demo li.xselectable-selected {
+      color: #ffffff;
+      background-color: #0064cd;
+      background-repeat: repeat-x;
+      background-image: -khtml-gradient(linear, left top, left bottom, from(#049cdb), to(#0064cd));
+      background-image: -moz-linear-gradient(top, #049cdb, #0064cd);
+      background-image: -ms-linear-gradient(top, #049cdb, #0064cd);
+      background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #049cdb), color-stop(100%, #0064cd));
+      background-image: -webkit-linear-gradient(top, #049cdb, #0064cd);
+      background-image: -o-linear-gradient(top, #049cdb, #0064cd);
+      background-image: linear-gradient(top, #049cdb, #0064cd);
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#049cdb', endColorstr='#0064cd', GradientType=0);
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+      border-color: #0064cd #0064cd #003f81;
+      border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
     }
 
     p {
@@ -80,24 +74,18 @@
   <script src="../../xselectable.js"></script>
   <script type="text/javascript" charset="utf-8">
     $().ready(function() {
-      $('body').xselectable({filter: 'li'});
+      $('ul.demo').xselectable({filter: 'li'});
     });
   </script>
 </head>
 <body>
-  <p>
-    Use the mouse to drag a selection box and select one or more of the items
-    in the list.
-  </p>
-  <ul>
+  <ul class="demo">
     <li>Apple</li>
     <li>Banana</li>
     <li>Kiwi</li>
     <li>Orange</li>
     <li>Peach</li>
     <li>Strawberry</li>
-    <li>Mango</li>
-    <li>Raspberry</li>
   </ul>
 </body>
 </html>
