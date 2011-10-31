@@ -1,0 +1,647 @@
+<!doctype html>
+<html>
+<head>
+  <!-- HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/prettify.css">
+  <style>
+    html, body {
+      background-color: #eee;
+    }
+    body {
+      padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+    }
+    .container > footer p {
+      text-align: center; /* center align it with the container */
+    }
+
+    .content {
+      background-color: #fff;
+      padding: 20px;
+      margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+      -webkit-border-radius: 0 0 6px 6px;
+         -moz-border-radius: 0 0 6px 6px;
+              border-radius: 0 0 6px 6px;
+      -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+              box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    }
+
+    iframe {
+      width: 100%;
+      border: 1px dotted #ddd;
+    }
+
+    ul.demo {
+      position: relative;
+      padding: 1em;
+      border: 1px dotted #ddd;
+      cursor: crosshair;
+    }
+
+    ul.demo li {
+      width: 60%;
+      list-style-type: none;
+      background-color: #eee;
+      border: 1px solid #b9b9b9;
+      -moz-border-radius: 2px;
+      -webkit-border-radius: 2px;
+      border-radius: 2px;
+      padding: 0.5em;
+      margin: 0.5em;
+    }
+
+    ul.demo li.xselectable-selected {
+      color: #ffffff;
+      background-color: #0064cd;
+      background-repeat: repeat-x;
+      background-image: -khtml-gradient(linear, left top, left bottom, from(#049cdb), to(#0064cd));
+      background-image: -moz-linear-gradient(top, #049cdb, #0064cd);
+      background-image: -ms-linear-gradient(top, #049cdb, #0064cd);
+      background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #049cdb), color-stop(100%, #0064cd));
+      background-image: -webkit-linear-gradient(top, #049cdb, #0064cd);
+      background-image: -o-linear-gradient(top, #049cdb, #0064cd);
+      background-image: linear-gradient(top, #049cdb, #0064cd);
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#049cdb', endColorstr='#0064cd', GradientType=0);
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+      border-color: #0064cd #0064cd #003f81;
+      border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    }
+
+    .xselectable-glass {
+      background-color: transparent;
+      z-index: 1000;
+      cursor: hand;
+      cursor: pointer;
+    }
+
+    .xselectable-box {
+      border: 1px dotted black;
+      background-color: rgba(255, 255, 255, 0.5);
+      cursor: hand;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="../xselectable.js"></script>
+  <script src="assets/prettify.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    $().ready(function() {
+      prettyPrint();
+      $('.demo').xselectable({filter: 'li'});
+    });
+  </script>
+</head>
+<body>
+  <div class="topbar">
+    <div class="fill">
+      <div class="container">
+        <a class="brand" href="#">jQuery-xselectable</a>
+        <ul class="nav">
+          <li><a href="#">Home</a></li>
+          <li><a href="#usage">Usage</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#options">Options</a></li>
+          <li><a href="#methods">Methods</a></li>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#demos">Demos</a></li>
+          <li><a href="#sources">Sources</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="content">
+      <div class="row">
+        <div class="span10">
+          <p>
+          <strong>jQuery-xselectable</strong> is a jQuery plugin to enable DOM
+          elements to be selectable. Draw a box with your cursor to select
+          items. You can try this live on the demo here on the right.
+          </p>
+          <p>
+          It behaves similarly to <a href="http://jqueryui.com/demos/selectable/">
+          jQuery UI 'selectable'</a>, but it offers a few extra features,
+          such as support for scrollable containers and selection over Flash
+          embeds.
+          </p>
+          <p><small>I haven't spent a huge amount of time trying to customize
+          jQuery UI 'selectable' behavior, so you may still be able to have it
+          handle some of the features described here, with enough effort.</small>
+          </p>
+          <p style="margin-top: 2em">
+          <a href="https://github.com/battlehorse/jquery-xselectable/zipball/master"
+             class="btn primary">Download</a>
+          <a href="#demos" class="btn">Demos</a>
+          <a href="https://github.com/battlehorse/jquery-xselectable"
+             class="btn">
+            Fork me on GitHub »</a>
+          </p>
+        </div>
+        <div class="span6">
+          <ul class="demo">
+            <li>Apple</li>
+            <li>Banana</li>
+            <li>Kiwi</li>
+            <li>Orange</li>
+            <li>Peach</li>
+          </ul>
+        </div>
+      </div>
+
+      <section id="usage">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Usage</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <pre class="prettyprint">
+&lt;html&gt;
+&lt;head&gt;
+  &lt;style&gt;
+    UL {
+      position: relative;
+    }
+
+    LI.xselectable-selected {
+      color: red;
+    }
+
+    .xselectable-glass {
+      background-color: transparent;
+      z-index: 1000;
+      cursor: hand;
+      cursor: pointer;
+    }
+
+    .xselectable-box {
+      border: 1px dotted black;
+      background-color: rgba(255, 255, 255, 0.5);
+      cursor: hand;
+      cursor: pointer;
+    }
+  &lt;/style&gt;
+  &lt;script src="jquery.min.js"&gt;&lt;/script&gt;
+  <strong>&lt;script src="xselectable.min.js"&gt;&lt;/script&gt;</strong>
+  &lt;script&gt;
+    $().ready(function() {
+      <strong>$('UL').xselectable();</strong>
+    });
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Apple&lt;/li&gt;
+    &lt;li&gt;Banana&lt;/li&gt;
+    &lt;li&gt;Kiwi&lt;/li&gt;
+    &lt;li&gt;Orange&lt;/li&gt;
+    &lt;li&gt;Peach&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;body&gt;
+&lt;/html&gt;</pre>
+          </div>
+          <div class="span6">
+            <p>
+            Include the plugin sources in your html page (after the jQuery
+            plugin) and use the <code>.xselectable()</code> method to activate
+            the plugin on elements of your choice.
+            </p>
+            <p>
+            Then define a minimum set of styles to configure the plugin behavior
+            and look'n'feel:
+            </p>
+            <ul>
+              <li>Ensure that the element that you intend to make selectable
+              has either <code>position: relative</code> or
+              <code>position: absolute</code>,</li>
+              <li>Define how selected items should appear via the
+              <code>.xseletable-selected</code> class,</li>
+              <li>Define how the selection box should appear via the
+              <code>.xselectable-box</code> class,</li>
+              <li>Define how the glass pane (superimposed to the selectable
+              elements during the selection gesture) should appeara via the
+              <code>.xselectable-glass</code> class.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="features">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Features</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <p>jQuery-xselectable offers a behavior similar to
+            <a href="http://jqueryui.com/demos/selectable/">jQuery UI 'selectable'</a>.
+            In addition to that, it offers the following extra features out of
+            the box:
+            </p>
+            <ul>
+              <li>
+              <strong>Selection over Flash embeds</strong>. Flash embeds would normally
+              swallow click events, causing the selection gesture not to
+              terminate if the mouse were to be released within the Flash embed.
+              This plugin separates the selection box from the selectable
+              elements via glass panels to fix that.</li>
+              <li>
+              <strong>Scrolling support</strong>. When the selectable container is scrollable and
+              the selection box is dragged toward its border, the container is
+              scrolled accordingly to let the selection gesture continue until
+              the container scrollable limits are hit.<br />
+              Scrolling management is pluggable, which allows for different
+              scrolling implementations (in addition to the default one which
+              relies on native browser scrolling functionality). For example, a
+              Google Maps-like endless scrolling can be easily implemented.<br />
+              The plugin tries to keep scrolling at 60fps.</li>
+              <li>
+              Selection does not inadvertently trigger when the mouse down event
+              occurs over scrollbars. See <a href="http://bugs.jqueryui.com/ticket/4441">
+              http://bugs.jqueryui.com/ticket/4441</a>.</li>
+              <li>
+              The plugin doesn't require any of jQuery UI machinery. It can be
+              used directly on top of jQuery, possibly reducing the javascript
+              payload used in the hosting page.</li>
+            </ul>
+            <p><span class="label notice">Notice</span>
+            The plugin semantics are similar to jQuery UI 'selectable' ones but
+            not the same. While it's fairly straightforward to replace jQuery UI
+            plugin for this, this pluging is not a 100% compatible drop-in
+            replacement. See the comments on top of the
+            <a href="https://github.com/battlehorse/jquery-xselectable/blob/master/xselectable.js">
+            plugin sources</a> for details.
+            </p>
+          </div>
+          <div class="span5 offset1">
+            <h4>Browser support</h4>
+            <p>
+            jQuery-xselectable is tested and supported in major modern browsers
+            like Chrome, Safari, Internet Explorer, and Firefox.
+            </p>
+            <img src="assets/browsers.png"
+                 alt="Tested and supported in Chrome, Safari, Internet Explorer, and Firefox">
+            <ul>
+              <li>Latest Safari</li>
+              <li>Latest Google Chrome</li>
+              <li>Firefox 3.6+</li>
+              <li>Internet Explorer 8+</li>
+              <li>Opera</li>
+            </ul>
+          </diV>
+      </section>
+
+      <section id="options">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Options</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <p>The plugin supports the following options:</p>
+            <table class="zebra-striped">
+              <tr>
+                <th>Option key</th>
+                <th>Default value</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td><code>distance</code></td>
+                <td>0</td>
+                <td>
+                  Tolerance, in pixels, for when selecting should start.
+                  If specified, selecting will not start until after mouse is
+                  dragged beyond distance.
+                </td>
+              </tr>
+              <tr>
+                <td><code>disabled</code></td>
+                <td>false</td>
+                <td>
+                  Whether the selectable behavior is enabled or not.
+                </td>
+              </tr>
+              <tr>
+                <td><code>cancel</code></td>
+                <td>:input,option</td>
+                <td>
+                  Prevents selecting if you start on elements matching the
+                  selector.
+                </td>
+              </tr>
+              <tr>
+                <td><code>filter</code></td>
+                <td>*</td>
+                <td>
+                  The matching child elements will be made able to be selected
+                </td>
+              </tr>
+              <tr>
+                <td><code>scrollingThreshold</code></td>
+                <td>100</td>
+                <td>
+                  The minimum pixel distance, from the selectable container
+                  border, that should trigger scrolling.
+                </td>
+              </tr>
+              <tr>
+                <td><code>scrollSpeedMultiplier</code></td>
+                <td>1</td>
+                <td>
+                  A multiplier to increase/decrease scrolling speed.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>scroller</code>
+                </td>
+                <td>null</td>
+                <td>
+                  <p>
+                  <span class="label important">Advanced</span>
+                  Custom scroller implementation. The scroller is responsible
+                  for scrolling the selectable container viewport when the
+                  selection box is close to the container border.</p>
+                  <p>The default implementation relies on native browser
+                  scrolling, but alternate implementations can provide
+                  Google Maps-like scrolling behavior. For examples on how to
+                  implement this, see <a href="#demos">demos</a> and the
+                  <a href="https://github.com/battlehorse/jquery-xselectable/blob/master/xselectable.js">
+                    plugin sources</a>.</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>positioner</code>
+                </td>
+                <td>null</td>
+                <td>
+                  <p>
+                  <span class="label important">Advanced</span>
+                  Custom positioner implementation. The positioner is
+                  responsible for computing selectable elements' positions when
+                  the selection gesture starts, in order to correctly determine
+                  when the selection box touches a selectable element.</p>
+                  <p>The default implementation computes selectables' positions
+                  via offset measurement. This works accurately if the element
+                  the plugin applies to (the selection container) is their
+                  offset parent.</p>
+                  <p>The default implementation recomputes selectables'
+                  positions every time the selection gesture starts. This may be
+                  inefficient when many selectable elements are present.</p>
+                  <p>Custom implementations may be provided to overcome the
+                  above limitations. For examples on how to
+                  implement this, see <a href="#demos">demos</a> and the
+                  <a href="https://github.com/battlehorse/jquery-xselectable/blob/master/xselectable.js">
+                    plugin sources</a>.</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="span6">
+            <p>Configure the plugin options at initialization time:</p>
+            <pre class="prettyprint">
+$('#container').xselectable({
+  'cancel': '.item',
+  'filter': '.item',
+  'distance': 10,
+  'scrollSpeedMultiplier': 1.2
+});</pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="methods">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Methods</h2>
+          </div>
+        </div>
+      </section>
+
+      <section id="events">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Events</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span16">
+            <p>
+            You can bind to different events fired by the plugin to react to
+            selections performed by the user. Use jQuery <code>bind()</code>
+            function to attach listeners for each event you are interested in.
+            </p>
+            <table class="zebra-striped">
+              <tr>
+                <th>Event name</th>
+                <th style="width: 300px">Description</th>
+                <th>Example</th>
+              </tr>
+              <tr>
+                <td><code>xselectable<strong>start</strong></code></td>
+                <td>
+                  Fired when the selection gesture starts.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable().bind(
+  'xselectablestart',
+  function(ev) {
+    console.log('selection is starting');
+  });</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xselectable<strong>selecting</strong></code></td>
+                <td>
+                  Fired while the selection gesture is in progress, for every
+                  element that becomes selected. It receives an <code>ui</code>
+                  parameter, which contains a reference to the element that
+                  became selected in its <code>selecting</code> property.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable().bind(
+  'xselectableselecting',
+  function(ev, ui) {
+    console.log(
+      'You selected: ', ui.selecting);
+  });</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xselectable<strong>unselecting</strong></code></td>
+                <td>
+                  Fired while the selection gesture is in progress, for every
+                  element that becomes unselected. It receives an <code>ui</code>
+                  parameter, which contains a reference to the element that
+                  became unselected in its <code>unselecting</code> property.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable().bind(
+  'xselectableunselecting',
+  function(ev, ui) {
+    console.log(
+      'You selected: ', ui.unselecting);
+  });</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xselectable<strong>selected</strong></code></td>
+                <td>
+                  Fired at the end of the selection gesture, before the
+                  <code>stop</code> event. It receives an <code>ui</code>
+                  parameter, which contains a reference to the list of elements
+                  that are currently selected in its <code>selected</code> property.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable().bind(
+  'xselectableselected',
+  function(ev, ui) {
+    for (var i = ui.selected.length - 1; i >= 0; i--) {
+      console.log(ui.selected[i], ' is selected');
+    }
+  });</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xselectable<strong>unselected</strong></code></td>
+                <td>
+                  Fired at the end of the selection gesture, before the
+                  <code>stop</code> event. It receives an <code>ui</code>
+                  parameter, which contains a reference to the list of elements
+                  that are currently unselected in its <code>unselected</code>
+                  property.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable().bind(
+  'xselectableunselected',
+  function(ev, ui) {
+    for (var i = ui.unselected.length - 1;
+         i >= 0; i--) {
+      console.log(ui.unselected[i], ' is NOT selected');
+    }
+  });</pre>
+                </td>
+              </tr>
+              <tr>
+                <td><code>xselectable<strong>stop</strong></code></td>
+                <td>
+                  Fired when the selection gesture ends.
+                </td>
+                <td>
+                  <pre class="prettyprint">
+$('#container').xselectable().bind(
+  'xselectablestop',
+  function(ev) {
+    console.log('selection has completed.');
+  });</pre>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="demos">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Demos</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <iframe src="../demos/basic/basic.html" style="height: 300px"></iframe>
+          </div>
+          <div class="span6">
+            <h4>Basic</h4>
+            <p>
+            Use the mouse to drag a selection box and select one or more of the
+            items in the list.
+            </p>
+            <p>
+              Open in a separate window:
+              <a href="../demos/basic/basic.html" target="_blank">basic.html</a>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <iframe src="../demos/flash/flash.html" style="height: 360px"></iframe>
+          </div>
+          <div class="span6">
+            <h4>Flash embeds</h4>
+            <p>
+            All the clocks are flash SWF files. Notices how you can drag
+            selection boxes over them, and terminate selection by releasing the
+            mouse button while hovering over a flash element.
+            </p>
+            <p>
+              Open in a separate window:
+              <a href="../demos/flash/flash.html" target="_blank">flash.html</a>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <iframe src="../demos/maps_scrolling/maps_scrolling.html" style="height: 500px"></iframe>
+          </div>
+          <div class="span6">
+            <h4>Google Maps Scrolling</h4>
+            <p>
+            This complex demo shows how to implement custom scrolling behavior
+            that works in sync with other libraries (in this case, the
+            <a href="http://code.google.com/apis/maps/index.html">Google Maps API</a>).
+            </p>
+            <p>
+              Try moving the selection box toward the map borders and see how
+              the map correctly scrolls in the desired direction, while
+              continuing the select operation.
+            </p>
+            <p>
+              Try zooming and panning to different locations, and see how the
+              selection process remains accurate.
+            <p>
+              Open in a separate window:
+              <a href="../demos/maps_scrolling/maps_scrolling.html" target="_blank">maps_scrolling.html</a>
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="sources">
+        <div class="row">
+          <div class="page-header span16">
+            <h2>Sources</h2>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>
+      <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+        <img alt="Creative Commons License"
+             style="border-width:0; vertical-align:text-bottom"
+             src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png">
+      </a>
+      2011 <a href="http://www.battlehorse.net">Riccardo Govoni</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
