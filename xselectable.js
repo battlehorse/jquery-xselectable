@@ -490,9 +490,6 @@
       return;
     }
 
-    // Trigger the selection 'start' event.
-    $this.trigger(pluginName + 'start');
-
     // Record the initial position of the container, with respect to the
     // document. Also include the current border size (assuming equal
     // top/bottom and right/left border sizes).
@@ -557,6 +554,9 @@
     data.curPosition = {'pageX': evt.pageX, 'pageY': evt.pageY};
 
     if (!data.selectionBox) {
+      // Trigger the selection 'start' event.
+      $this.trigger(pluginName + 'start');
+
       // Create the selection box if we haven't created it yet.
       createSelectionBox.apply(this);
 
