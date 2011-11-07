@@ -388,9 +388,10 @@
 
         // Compute the scrolling shift: the closer we push the mouse toward the
         // border, the bigger the shift.
-        var shift = metric.direction *
-            Math.min(available, Math.ceil((threshold - metric.distance) / 10)) *
-            scrollLagMultiplier * scrollSpeedMultiplier;
+        var shift = metric.direction * Math.round(Math.min(
+            available,
+            Math.ceil((threshold - metric.distance) / 10) *
+                scrollLagMultiplier * scrollSpeedMultiplier));
 
         // Scroll in the desired direction
         scroller.scroll(metric.scrollAxis, shift);

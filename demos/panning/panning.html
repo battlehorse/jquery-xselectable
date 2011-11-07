@@ -58,7 +58,7 @@
   <script src="../../xselectable.js"></script>
   <script type="text/javascript" charset="utf-8">
     $().ready(function() {
-      
+
       // Fill the selectable container with 50x50 blocks, each one showing a
       // chunk of the background image.
       var width = $('#universe').width(),
@@ -78,7 +78,7 @@
           x += side;
         }
       }
-            
+
       // Compute the available scrolling distance in each direction, based
       // one the dimension of the background image and the dimension of the
       // container viewport.
@@ -87,7 +87,7 @@
         'left': 0,
         'bottom': 500,
         'right': $('#universe').width() - $('#viewport').width()
-      };      
+      };
 
       // Activate the selectable plugin, along with a custom scroller that
       // pans the background image accordingly when scrolling is required.
@@ -104,7 +104,6 @@
             },
             scroll: function(axis, shift) {
               // shift is negative when scrolling top (content must shift bottom)
-              shift = Math.round(shift);
               if (axis == 'vertical') {
                 $('#universe').css('top',
                   parseInt($('#universe').css('top'), 10) - shift);
