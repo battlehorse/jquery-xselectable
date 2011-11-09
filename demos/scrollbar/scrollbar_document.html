@@ -4,24 +4,34 @@
   <title>jQuery xselectable :: Scrollable demo</title>
   <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
   <style>
-    html {
-      overflow-y: auto;
-    }
-
-    body {
-      height: 400px;
-    }
-
     .viewport {
       position: relative;
-      width: 98%;
-      height: 400px;
-      overflow: auto;
+      overflow: hidden;
+      margin: 150px;
+      width: 610px;
+      border: 1px solid #ddd;
+    }
+
+    P {
+      font-size: 0.9em;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0.5em;
+    }
+
+    P.legend {
+      position: absolute;
+      top: 130px;
+      left: 150px;
+      margin: 0;
     }
 
     .box {
+      display: inline-block;
       width: 100px;
       height: 100px;
+      margin: 10px;
       background-color: #eee;
       border: 1px solid #b9b9b9;
       -moz-border-radius: 2px;
@@ -67,19 +77,9 @@
   <script src="../../xselectable.js"></script>
   <script type="text/javascript" charset="utf-8">
     $().ready(function() {
-      var width = 1000, height = 1000, x = 10, y = 10, side = 100, i = 0;
-      while (x < width || y < height) {
-        var box = $('<div />', {'id': 'box_' + x + '_' + y, 'class': 'box'}).css({
-          'position': 'absolute',
-          'top': y + 'px',
-          'left': x + 'px'
-        }).text(++i).appendTo($('#viewport'));
-        if (x + side + 10 > width) {
-          x = 10;
-          y += side + 10;
-        } else {
-          x += side + 10;
-        }
+      for (var i = 0; i < 100; i++) {
+        var box = $('<div />', {'id': 'box_' + i, 'class': 'box'}).
+            text(i).appendTo($('#viewport'));
       }
 
       $('.viewport').xselectable({'filter': '.box', 'distance': 2});
@@ -87,6 +87,14 @@
   </script>
 </head>
 <body>
+  <p>
+    Try reducing the browser window size in order to have scrollbars on both
+    axes. Notice how scrolling while selecting does not go past the selection
+    container margins, even though the document allows for further scrolling.
+    Try setting <code>margin: 0</code> on the <code>#viewport</code> element
+    and notice how scrolling now reaches the document margins.
+  </p>
+  <p class="legend"><span class="label">#viewport</span></p>
   <div class="viewport" id="viewport" unselectable="on"></div>
 </body>
 </html>
