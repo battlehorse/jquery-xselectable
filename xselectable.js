@@ -482,7 +482,6 @@
    * @param {number?} scrollTimestamp The timestamp at which the last scrolling
    *     operation was performed. Undefined if a mouse movement occurred in
    *     between.
-   * @param {
    */
   var updateViewportScrolling = function(evt, scroller, scrollTimestamp) {
     var $this = $(this),
