@@ -178,15 +178,15 @@
         window.innerHeight : document.documentElement.clientHeight;
 
     // Browser document length
-    var documentWidth = document.documentElement.offsetWidth,
-        documentHeight = document.documentElement.offsetHeight;
+    var documentWidth = document.documentElement.scrollWidth,
+        documentHeight = document.documentElement.scrollHeight;
 
     /**
      * @return {!Element} The DOM element which is scrolled when this scroller
      *     operates. For this scroller it's the documentElement or body.
      */
     function getScrollableElement() {
-      return document.documentElement || document.body;
+      return document.documentElement;
     }
 
     /**
@@ -200,9 +200,9 @@
      */
     function getScrollBorders() {
       var scrollTop = typeof(window.pageYOffset) == 'number' ?
-          window.pageYOffset : document.body.scrollTop;
+          window.pageYOffset : document.documentElement.scrollTop;
       var scrollLeft = typeof(window.pageXOffset) == 'number' ?
-          window.pageXOffset : document.body.scrollLeft;
+          window.pageXOffset : document.documentElement.scrollLeft;
 
       return [scrollTop, scrollLeft + width, scrollTop + height, scrollLeft];
     }
@@ -219,9 +219,9 @@
      */
     function getScrollableDistances() {
       var scrollTop = typeof(window.pageYOffset) == 'number' ?
-          window.pageYOffset : document.body.scrollTop;
+          window.pageYOffset : document.documentElement.scrollTop;
       var scrollLeft = typeof(window.pageXOffset) == 'number' ?
-          window.pageXOffset : document.body.scrollLeft;
+          window.pageXOffset : document.documentElement.scrollLeft;
       return [
           Math.max(scrollTop - containerDimensions.top, 0), 
           Math.max(
