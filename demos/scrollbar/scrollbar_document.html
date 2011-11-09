@@ -78,7 +78,10 @@
   <script type="text/javascript" charset="utf-8">
     $().ready(function() {
       for (var i = 0; i < 100; i++) {
-        var box = $('<div />', {'id': 'box_' + i, 'class': 'box'}).
+        var box = $('<div />', {
+          'id': 'box_' + i,
+          'class': 'box',
+          'unselectable': 'on'}).
             text(i).appendTo($('#viewport'));
       }
 

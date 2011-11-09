@@ -35,10 +35,14 @@
       background-repeat: no-repeat;
       overflow: hidden;
       opacity: 0.2;
+      -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=20); 
+      filter: alpha(opacity=20);
     }
 
     .box.xselectable-selected {
       opacity: 1;
+      -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100); 
+      filter: alpha(opacity=100);
     }
 
     .xselectable-glass {
@@ -49,6 +53,7 @@
     }
 
     .xselectable-box {
+      border: 1px solid rgb(255, 255, 255);
       border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: hand;
       cursor: pointer;
