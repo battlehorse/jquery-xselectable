@@ -30,10 +30,12 @@
  *   were to be released within the Flash embed. This plugin separates the
  *   selection box from the selectable elements via glass panels to fix that.
  *
- * - Scrolling support. When the selectable container is scrollable and the
- *   selection box is dragged toward its border, the container is scrolled
- *   accordingly to let the selection gesture continue until the container
- *   scrollable limits are hit.
+ * - Scrolling support. When the selectable container overflows the window
+ *   viewport or the selectable elements overflow the selectable viewable
+ *   viewport (causing scrollbars to appear on it) and the selection box is
+ *   dragged toward the viewport borders, the viewport (either the document
+ *   or the selectable) is scrolled accordingly to let the selection gesture
+ *   continue until the viewport scrolling limits are hit.
  *   Scrolling management is pluggable, which allows for different scrolling
  *   implementations (in addition to the default one which relies on native
  *   browser scrolling functionality). For example, a Google Maps-like endless
@@ -102,7 +104,7 @@
     // The matching child elements will be made able to be selected.
     filter: '*',
 
-    // The minimum pixel distance, from the selectable container border that
+    // The minimum pixel distance, from the scrolling viewport border that
     // should trigger scrolling.
     scrollingThreshold: 100,
 
@@ -110,10 +112,23 @@
     scrollSpeedMultiplier: 1,
 
     // Custom scroller implementation. If null, the default one is used.
+    //
+    // The default scroller relies on native browser scrolling functionality
+    // and deals with two specific cases (possibly concurrently):
+    // - the selection container overflows the browser window viewport: the
+    //   browser window is scrolled to let the selection box expand until it
+    //   hits the selection container margins.
+    // - the selectable content overflows the selection container viewport
+    //   (causing the container to have scrollbars): the selectable content is
+    //   scrolled to let the selection box expand until it hits the selectable
+    //   content  margins.
+    // Both conditions can happen at the same time, in which case the former
+    // is addressed first, then the latter.
+    //
     // If provided, it must be a function that accepts the element upon which
     // the plugin is applied and returns an object implementing the required
-    // scroller methods (getScrollableDistance, scroll,getScrollOffset). See
-    // 'defaultScroller' for details.
+    // scroller methods (getScrollableElement, getScrollableDistance, scroll,
+    // getScrollOffset, getScrollBorders). See 'contentScroller' for details.
     scroller: null,
 
     // Custom positioner implementation. The positioner is responsible for
@@ -144,20 +159,140 @@
   };
 
   /**
-   * Default scroller. It scrolls the selection container viewport using
-   * native browser scrolling mechanisms whenever the selection box comes
-   * close to the viewport borders.
+   * A scroller to handle native document (browser window) scrolling when the
+   * selection container overflows the window viewport. It triggers when the
+   * selection box comes close to the browser window borders.
    *
    * @param {!Element} el The selection container, i.e. the element to which the
    *     plugin is applied to.
    */
-  var defaultScroller = function(el) {
+  var documentScroller = function(el) {
+
+    // Dimensions of the selection container
+    var containerDimensions = $(el).data(pluginName).containerDimensions;
+
+    // Browser window viewport dimensions
+    var width = typeof(window.innerWidth) == 'number' ?
+        window.innerWidth : document.documentElement.clientWidth;
+    var height = typeof(window.innerHeight) == 'number' ?
+        window.innerHeight : document.documentElement.clientHeight;
+
+    // Browser document length
+    var documentWidth = document.documentElement.offsetWidth,
+        documentHeight = document.documentElement.offsetHeight;
+
+    /**
+     * @return {!Element} The DOM element which is scrolled when this scroller
+     *     operates. For this scroller it's the documentElement or body.
+     */
+    function getScrollableElement() {
+      return document.documentElement || document.body;
+    }
+
+    /**
+     * Returns the top, right, bottom and left positions of the viewport
+     * borders that should trigger scrolling when the selection box is dragged
+     * close to them.
+     *
+     * @return {!Array.<number>} Positions of the scrolling viewport borders,
+     *     respectively in the following order: top, right, bottom, left. All
+     *     positions are relative to the top-left corner of the document.
+     */
+    function getScrollBorders() {
+      var scrollTop = typeof(window.pageYOffset) == 'number' ?
+          window.pageYOffset : document.body.scrollTop;
+      var scrollLeft = typeof(window.pageXOffset) == 'number' ?
+          window.pageXOffset : document.body.scrollLeft;
+
+      return [scrollTop, scrollLeft + width, scrollTop + height, scrollLeft];
+    }
+
+    /**
+     * Returns the available distance the scrolling viewport can still be
+     * scrolled before reaching the selection container margins: even if the
+     * document could scroll further past the selection container margins,
+     * dragging the selection box does not cause further scrolling once the
+     * selection container margins are in view.
+     *
+     * @return {!Array.<number>} Available scrolling distances (in px),
+     *     respectively from the following margins: top, right, bottom, left.
+     */
+    function getScrollableDistances() {
+      var scrollTop = typeof(window.pageYOffset) == 'number' ?
+          window.pageYOffset : document.body.scrollTop;
+      var scrollLeft = typeof(window.pageXOffset) == 'number' ?
+          window.pageXOffset : document.body.scrollLeft;
+      return [
+          Math.max(scrollTop - containerDimensions.top, 0), 
+          Math.max(
+              containerDimensions.left + containerDimensions.width
+              - scrollLeft - width, 0),
+          Math.max(
+              containerDimensions.top + containerDimensions.height
+              - scrollTop - height, 0),
+          Math.max(scrollLeft - containerDimensions.left, 0)];
+    }
+
+    /**
+     * Scrolls the browser window viewport by the required amount.
+     *
+     * @param {string} scrollAxis The scrolling axis, either 'vertical' or
+     *     'horizontal'.
+     * @param {number} shift The scrolling amount, in pixels. If positive the
+     *     scrolling direction should be downward / rightward. If negative,
+     *     upward / leftward.
+     */
+    function scroll(scrollAxis, shift) {
+      if (scrollAxis == 'vertical') {
+        window.scrollBy(0, shift);
+      } else {
+        window.scrollBy(shift, 0);
+      }
+    }
+
+    /**
+     * Returns the offset, in pixels, that should be added to selectable
+     * elements' positions (as computed by the plugin 'positioner'), to take
+     * into account scrolling. This is not relevant when native browser
+     * scrolling is used.
+     *
+     * @return {!Object.<string, number>} An object containing the 'top' and
+     *     'left' properties, pointing respectively to the top and left offset
+     *     to add.
+     */
+    function getScrollOffset() {
+      return {top: 0, left: 0};
+    }
+
+    return {
+      getScrollableElement: getScrollableElement,
+      getScrollBorders: getScrollBorders,
+      getScrollableDistances: getScrollableDistances,
+      scroll: scroll,
+      getScrollOffset: getScrollOffset,
+
+      // Chain this scroller to the contentScroller, so that it starts
+      // triggering as soon as document scrolling terminates.
+      next: contentScroller(el)
+    };
+  };
+
+  /**
+   * Content scroller. It scrolls the selection container viewport using
+   * native browser scrolling mechanisms whenever the selection box comes
+   * close to the viewport borders and the selectable content overflows the
+   * selection container viewport.
+   *
+   * @param {!Element} el The selection container, i.e. the element to which the
+   *     plugin is applied to.
+   */
+  var contentScroller = function(el) {
 
     var containerDimensions = $(el).data(pluginName).containerDimensions;
 
     /**
      * Returns the available distance the selection container viewport can
-     * still be scrolled before reaching the selection container borders.
+     * still be scrolled before reaching the selection container margins.
      *
      * @return {!Array.<number>} Available scrolling distances, respectively
      *     from the following borders: top, right, bottom, left.
@@ -207,6 +342,36 @@
       scroll: scroll,
       getScrollOffset: getScrollOffset
     };
+  };
+
+  /**
+   * @return {!Element} The default DOM element which is assumed to be
+   *     scrolled when this scroller operates, if the scroller does not
+   *     specify any in its 'getSrollableElement' method. The default is the
+   *     the selection container itself.
+   */
+  var getDefaultScrollableElement = function() {
+    return this;
+  };
+
+  /**
+   * Returns the default top, right, bottom and left positions of the viewport
+   * borders that should trigger scrolling when the selection box is dragged
+   * close to them, if the scroller does not specify any in its
+   * 'getScrollBorders' method.
+   *
+   * @return {!Array.<number>} Positions of the scrolling viewport borders,
+   *     respectively in the following order: top, right, bottom, left. All
+   *     positions are relative to the top-left corner of the document. The
+   *     default are the border positions of the selection container itself.
+   */
+  var getDefaultScrollBorders = function() {
+    var containerDimensions = $(this).data(pluginName).containerDimensions;
+    return [
+        containerDimensions.top,
+        containerDimensions.left + containerDimensions.width,
+        containerDimensions.top + containerDimensions.height,
+        containerDimensions.left];
   };
 
   /**
@@ -291,6 +456,8 @@
   var updateSelectionBox = function(evt) {
     var data = $(this).data(pluginName);
     data.selectionBoxExtents = {
+      // pageX, pageY positions are relative to the document, so they need
+      // to be converted to the selection container reference frame.
       'top':
           Math.min(data.startPosition.pageY, evt.pageY) -
           data.containerDimensions.top +
@@ -310,14 +477,16 @@
    * box is being dragged too close to the viewport borders.
    *
    * @param {!Event} evt The last mousemove event received.
+   * @param {!Object} scroller A scroller implementation, for example
+   *     'documentScroller' or 'contentScroller'.
    * @param {number?} scrollTimestamp The timestamp at which the last scrolling
    *     operation was performed. Undefined if a mouse movement occurred in
    *     between.
+   * @param {
    */
-  var updateViewportScrolling = function(evt, scrollTimestamp) {
+  var updateViewportScrolling = function(evt, scroller, scrollTimestamp) {
     var $this = $(this),
         data = $this.data(pluginName),
-        scroller = data.scroller,
         containerDimensions = data.containerDimensions,
         threshold = data.options.scrollingThreshold,
         scrollSpeedMultiplier = data.options.scrollSpeedMultiplier;
@@ -327,59 +496,61 @@
       delete data.scrollingTimeout;
     }
 
+    // Compute a multiplier based on the actual amount of time that
+    // passed since the last scrolling update, to keep scrolling speed
+    // constant as if scrolling occurred at exactly 60fps.
+    var scrollLagMultiplier = scrollTimestamp ?
+        (new Date().getTime() - scrollTimestamp) / 16 : 1;
+    var tickTimestamp = scrollTimestamp;
+
+    var scrolled = false;
+    var scrollableDistances = scroller.getScrollableDistances();
+    var scrollBorders = scroller.getScrollBorders ?
+        scroller.getScrollBorders() : getDefaultScrollBorders.call(this);
+    var scrollableElement = scroller.getScrollableElement ?
+        scroller.getScrollableElement() :
+        getDefaultScrollableElement.call(this);
+
     var scrollMetrics = [
       { // top
-        distance: Math.max(evt.pageY - containerDimensions.top, 0),
+        distance: Math.max(evt.pageY - scrollBorders[0], 0),
         direction: -1,
         scrollAxis: 'vertical',
         positionProperty: 'pageY'
       },
       { // right
-        distance: Math.max(
-            containerDimensions.left + containerDimensions.width - evt.pageX,
-            0),
+        distance: Math.max(scrollBorders[1] - evt.pageX, 0),
         direction: 1,
         scrollAxis: 'horizontal',
         positionProperty: 'pageX'
       },
       { // bottom
-        distance: Math.max(
-            containerDimensions.top + containerDimensions.height - evt.pageY,
-            0),
+        distance: Math.max(scrollBorders[2] - evt.pageY, 0),
         direction: 1,
         scrollAxis: 'vertical',
         positionProperty: 'pageY'
       },
       { // left
-        distance: Math.max(evt.pageX - containerDimensions.left, 0),
+        distance: Math.max(evt.pageX - scrollBorders[3], 0),
         direction: -1,
         scrollAxis: 'horizontal',
         positionProperty: 'pageX'
       }
     ];
 
-    var scrolled = false;
-    var scrollableDistances = scroller.getScrollableDistances();
-
-    // Compute a multiplier based on the actual amount of time that
-    // passed since the last scrolling update, to keep scrolling speed
-    // constant as if scrolling occurred at exactly 60fps.
-    var scrollLagMultiplier = scrollTimestamp ?
-        (new Date().getTime() - scrollTimestamp) / 16 : 1;
-    scrollTimestamp = new Date().getTime();
-
     for (var i = scrollMetrics.length - 1; i >= 0; i--) {
       var metric = scrollMetrics[i];
       var available = scrollableDistances[i];
 
       if (
-          // We are within a minimum threshold distance from the border, and
+          // We are within a minimum threshold distance from the viewport
+          // border, and
           metric.distance < threshold &&
 
           // We still have room for scrolling, and
           available > 0 &&
 
-            // We are moving toward the border
+            // We are moving toward the viewport border
             sign(
                 data.curPosition[metric.positionProperty] -
                 data.lastPosition[metric.positionProperty]) ==
@@ -387,7 +558,7 @@
         ) {
 
         // Compute the scrolling shift: the closer we push the mouse toward the
-        // border, the bigger the shift.
+        // viewport border, the bigger the shift.
         var shift = metric.direction * Math.round(Math.min(
             available,
             Math.ceil((threshold - metric.distance) / 10) *
@@ -396,22 +567,35 @@
         // Scroll in the desired direction
         scroller.scroll(metric.scrollAxis, shift);
 
-        // Move the selection box starting position in the opposite direction
-        // by the same amount, to keep its origin fixed.
-        data.startPosition[metric.positionProperty] -= shift;
-        data.curPosition[metric.positionProperty] -= shift;
+        if (scrollableElement == this) {
+          // If we scrolled the content of the selection container, move the
+          // selection box starting position in the opposite direction by the
+          // same amount, to keep its origin fixed (with respect to the
+          // selection container top-left corner).
+          data.startPosition[metric.positionProperty] -= shift;
+          data.curPosition[metric.positionProperty] -= shift;
+        } else {
+          // Otherwise, if a wrapping element was scrolled (assuming it wraps
+          // the selection container), advance the mouse position by the same
+          // amount.
+          evt[metric.positionProperty] += shift;
+        }
+
         scrolled = true;
       }
     }
 
-    // If scrolling start, continue scrolling until another mouse movement is
-    // detected (to handle the case when the mouse is moved toward a viewport
-    // border and left stationary for the scrolling to continue at a constant
-    // speed).
     if (scrolled) {
+      // If scrolling started, continue scrolling until another mouse movement
+      // is detected (to handle the case when the mouse is moved toward a
+      // viewport border and left stationary for the scrolling to continue at a
+      // constant speed).
       data.scrollingTimeout = window.setTimeout($.proxy(
-          function() { tick.call(this, evt, scrollTimestamp); }, this),
+          function() { tick.call(this, evt, tickTimestamp); }, this),
           16);  // try to keep scrolling at 60fps.
+    } else if (scroller.next) {
+      // Delegate to a chained scroller, if present.
+      updateViewportScrolling.call(this, evt, scroller.next, scrollTimestamp);
     }
   };
 
@@ -421,10 +605,18 @@
    * whether the selection box currently touches them or not. Triggers
    * 'selecting' and 'unselecting' events.
    */
-  var markSelected = function() {
+  var markSelected = function(scroller) {
     var $this = $(this),
-        data = $this.data(pluginName),
-        offset = data.scroller.getScrollOffset();
+        data = $this.data(pluginName);
+
+    var offset = {top: 0, left: 0};
+    var scrollerChain = scroller;
+    while (!!scrollerChain) {
+      var scrollerOffset = scrollerChain.getScrollOffset();
+      offset.top += scrollerOffset.top;
+      offset.left += scrollerOffset.left;
+      scrollerChain = scrollerChain.next;
+    }
 
     for (var i = data.selectables.length - 1; i >=0 ; i--) {
       var selectable = data.selectables[i];
@@ -510,8 +702,8 @@
     data.curPosition = {'pageX': evt.pageX, 'pageY': evt.pageY};
 
     // Init the scroller
-    data.scroller =
-        (data.options.scroller || defaultScroller).call(this, this);
+    data.scroller = (data.options.scroller || documentScroller).
+        call(this, this);
 
     // Start listening for mouseup (to terminate selection), movement and
     // wheel scrolling. Mouseups and movement can occur everywhere in the
@@ -542,6 +734,7 @@
   var tick = function(evt, scrollTimestamp) {
     var $this = $(this),
         data = $this.data(pluginName),
+        scroller = data.scroller,
         distance = data.options.distance;
 
     // Do nothing if we haven't yet moved past the distance threshold.
@@ -567,14 +760,14 @@
     }
 
     // scroll the viewport if the mouse moves near the viewport boundaries.
-    updateViewportScrolling.call(this, evt, scrollTimestamp);
+    updateViewportScrolling.call(this, evt, scroller, scrollTimestamp);
 
     // update the selection box position and size.
     updateSelectionBox.call(this, evt);
 
     // mark elements as selected / deselected based on the current
     // selection box extent.
-    markSelected.call(this);
+    markSelected.call(this, scroller);
   };
 
   /**
