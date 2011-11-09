@@ -269,10 +269,14 @@
               This plugin separates the selection box from the selectable
               elements via glass panels to fix that.</li>
               <li>
-              <strong>Scrolling support</strong>. When the selectable container is scrollable and
-              the selection box is dragged toward its border, the container is
-              scrolled accordingly to let the selection gesture continue until
-              the container scrollable limits are hit.<br />
+              <strong>Scrolling support</strong>. When the selectable container
+              overflows the browser window viewport (or the selectable elements
+              overflow the container viewport) and the selection box is dragged
+              toward the viewport borders, the viewport is scrolled accordingly
+              to let the selection gesture continue until the viewport scrolling
+              limits are hit. In practice, this means you don't have to worry
+              about scrolling, either the browser window or the selectable
+              element itself (if you configured it to have scrollbars).<br />
               Scrolling management is pluggable, which allows for different
               scrolling implementations (in addition to the default one which
               relies on native browser scrolling functionality). For example, a
@@ -384,8 +388,9 @@
                   <p>
                   <span class="label important">Advanced</span>
                   Custom scroller implementation. The scroller is responsible
-                  for scrolling the selectable container viewport when the
-                  selection box is close to the container border.</p>
+                  for scrolling the viewport (the browser window and/or the
+                  selectable container itself, depending on its CSS styling)
+                  when the selection box is close to the viewport borders.</p>
                   <p>The default implementation relies on native browser
                   scrolling, but alternate implementations can provide
                   Google Maps-like scrolling behavior. For examples on how to
@@ -691,6 +696,13 @@ $('#container').xselectable().bind(
             <p>
               Open in a separate window:
               <a href="demos/scrollbar/scrollbar.html" target="_blank">scrollbar.html</a>
+            </p>
+            <p>Demo variants exist for 
+              <a href="demos/scrollbar/scrollbar_document.html" target="_blank">
+                scrolling of the browser window</a> and
+              <a href="demos/scrollbar/scrollbar_both.html" target="_blank">
+                combined scrolling of both the browser window and the selectable
+                container</a>.
             </p>
           </div>
         </div>
