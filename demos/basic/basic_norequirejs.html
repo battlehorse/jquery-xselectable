@@ -69,31 +69,22 @@
       width: 15em;
       margin: 1em;
     }
-  </style>  
+  </style>
   <!--
-    This file shows how to load the xselectable plugin using requirejs
-    (http://requirejs.org/). jquery is loaded separately, before the main
-    requirejs loading sequence starts, as discussed in
-    https://github.com/jrburke/require-jquery, to reflect the fact that most
-    users load jquery directly from their own sources/CDN and not bundled with
-    requirejs.
+    This file shows how to load the xselectable plugin without depending on
+    requirejs: you just have to include the jquery library and the plugin source.
 
-    If you are not using requirejs, have a look at basic_norequirejs.html
+    If you are using requirejs, have a look at basic.html
+
+    Replace xselectable.js with xselectable.min.js to use the minified version
+    of the plugin.
   -->
-  <script type="text/javascript" src="../../lib/require.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="../../xselectable.js"></script>
   <script>
-    require.config({
-      baseUrl: '../../',
-      paths: {
-        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min'
-      },
-      priority: ['jquery']
-    });
-    require(['jquery', 'xselectable'], function($) {
       $().ready(function() {
         $('ul.demo').xselectable({filter: 'li'});
       });
-    });
   </script>
 </head>
 <body>

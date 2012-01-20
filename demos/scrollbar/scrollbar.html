@@ -63,29 +63,43 @@
       cursor: pointer;
     }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-  <script src="../../xselectable.js"></script>
-  <script type="text/javascript" charset="utf-8">
-    $().ready(function() {
-      var width = 1000, height = 1000, x = 10, y = 10, side = 100, i = 0;
-      while (x < width || y < height) {
-        var box = $('<div />', {
-          'id': 'box_' + x + '_' + y,
-          'class': 'box',
-          'unselectable': 'on'}).css({
-          'position': 'absolute',
-          'top': y + 'px',
-          'left': x + 'px'
-        }).text(++i).appendTo($('#viewport'));
-        if (x + side + 10 > width) {
-          x = 10;
-          y += side + 10;
-        } else {
-          x += side + 10;
+  <!--
+    This file uses requirejs (http://requirejs.org/) to load dependencies,
+    including the xselectable plugin. See demos/basic/basic.html and
+    demos/basic/basic_norequirejs.html on how to use the xselectable plugin with and
+    without requirejs.
+  -->
+  <script type="text/javascript" src="../../lib/require.js"></script>
+  <script type="text/javascript">
+    require.config({
+      baseUrl: '../../',
+      paths: {
+        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min'
+      },
+      priority: ['jquery']
+    });
+    require(['jquery', 'xselectable'], function($) {
+      $().ready(function() {
+        var width = 1000, height = 1000, x = 10, y = 10, side = 100, i = 0;
+        while (x < width || y < height) {
+          var box = $('<div />', {
+            'id': 'box_' + x + '_' + y,
+            'class': 'box',
+            'unselectable': 'on'}).css({
+            'position': 'absolute',
+            'top': y + 'px',
+            'left': x + 'px'
+          }).text(++i).appendTo($('#viewport'));
+          if (x + side + 10 > width) {
+            x = 10;
+            y += side + 10;
+          } else {
+            x += side + 10;
+          }
         }
-      }
 
-      $('.viewport').xselectable({'filter': '.box', 'distance': 2});
+        $('.viewport').xselectable({'filter': '.box', 'distance': 2});
+      });
     });
   </script>
 </head>

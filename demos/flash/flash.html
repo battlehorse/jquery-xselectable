@@ -50,42 +50,56 @@
       cursor: pointer;
     }
   </style>
+  <!--
+    This file uses requirejs (http://requirejs.org/) to load dependencies,
+    including the xselectable plugin. See demos/basic/basic.html and
+    demos/basic/basic_norequirejs.html on how to use the xselectable plugin with and
+    without requirejs.
+  -->
   <script src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-  <script src="../../xselectable.js"></script>
-  <script type="text/javascript" charset="utf-8">
-    $().ready(function() {
-      // Create a set of sample Flash embeds.
-      var container = $('#container');
-      for (var j = 0; j < 2; j++) {
-        for (var i = 0; i < 2; i++) {
-          var swf = $('<div />', {'class': 'swf'}).
-            data('clock', j*2+i).
-            appendTo(container);
+  <script type="text/javascript" src="../../lib/require.js"></script>
+  <script>
+    require.config({
+      baseUrl: '../../',
+      paths: {
+        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min'
+      },
+      priority: ['jquery']
+    });
+    require(['jquery', 'xselectable'], function($) {
+      $().ready(function() {
+        // Create a set of sample Flash embeds.
+        var container = $('#container');
+        for (var j = 0; j < 2; j++) {
+          for (var i = 0; i < 2; i++) {
+            var swf = $('<div />', {'class': 'swf'}).
+              data('clock', j*2+i).
+              appendTo(container);
 
-          var embedid = 'embed-' + (j*2+i);
-          $('<div />', {'id': embedid}).appendTo(swf);
-          var params = {
-            allowScriptAccess: "always",
-            wmode: 'opaque',
-            bgcolor: '#ffffff'
-          };
-          var atts = { id: embedid };
-          swfobject.embedSWF(
-            "clock.swf", embedid, "150", "150", "8", null, null, params, atts);
+            var embedid = 'embed-' + (j*2+i);
+            $('<div />', {'id': embedid}).appendTo(swf);
+            var params = {
+              allowScriptAccess: "always",
+              wmode: 'opaque',
+              bgcolor: '#ffffff'
+            };
+            var atts = { id: embedid };
+            swfobject.embedSWF(
+              "clock.swf", embedid, "150", "150", "8", null, null, params, atts);
+          }
         }
-      }
 
-      // Configure the selectable plugin.
-      $('#container').xselectable({filter: '.swf'}).
-        bind('xselectablestart', function() {
-          $('ul').children().remove();
-        }).bind('xselectableselecting', function(ev, ui) {
-          var clock = $(ui.selecting).data('clock');
-          $('ul').append($('<li />', {'id': 'clock-' + clock}).text('Clock ' + clock));
-        }).bind('xselectableunselecting', function(ev, ui) {
-          $('#clock-' + $(ui.unselecting).data('clock')).remove();
-        });
+        // Configure the selectable plugin.
+        $('#container').xselectable({filter: '.swf'}).
+          bind('xselectablestart', function() {
+            $('ul').children().remove();
+          }).bind('xselectableselecting', function(ev, ui) {
+            var clock = $(ui.selecting).data('clock');
+            $('ul').append($('<li />', {'id': 'clock-' + clock}).text('Clock ' + clock));
+          }).bind('xselectableunselecting', function(ev, ui) {
+            $('#clock-' + $(ui.unselecting).data('clock')).remove();
+          });
+      });
     });
   </script>
 </head>

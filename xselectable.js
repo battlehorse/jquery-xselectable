@@ -81,7 +81,17 @@
  * Refer to http://github.com/battlehorse/jquery-xselectable for further info,
  * documentation and demos.
  */
-(function ( $, window, document, undefined ) {
+
+// Requirejs-compatible plugin definition, from https://github.com/umdjs/umd
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD Registration
+        define(['jquery'], factory);
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
 
   var pluginName = 'xselectable';
 
@@ -906,4 +916,4 @@
     }
 
   };
-})(jQuery, window, document);
+}));

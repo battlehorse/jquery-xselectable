@@ -73,19 +73,33 @@
       cursor: pointer;
     }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-  <script src="../../xselectable.js"></script>
-  <script type="text/javascript" charset="utf-8">
-    $().ready(function() {
-      for (var i = 0; i < 100; i++) {
-        var box = $('<div />', {
-          'id': 'box_' + i,
-          'class': 'box',
-          'unselectable': 'on'}).
-            text(i).appendTo($('#viewport'));
-      }
+  <!--
+    This file uses requirejs (http://requirejs.org/) to load dependencies,
+    including the xselectable plugin. See demos/basic/basic.html and
+    demos/basic/basic_norequirejs.html on how to use the xselectable plugin with and
+    without requirejs.
+  -->
+  <script type="text/javascript" src="../../lib/require.js"></script>
+  <script type="text/javascript">
+    require.config({
+      baseUrl: '../../',
+      paths: {
+        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min'
+      },
+      priority: ['jquery']
+    });
+    require(['jquery', 'xselectable'], function($) {
+      $().ready(function() {
+        for (var i = 0; i < 100; i++) {
+          var box = $('<div />', {
+            'id': 'box_' + i,
+            'class': 'box',
+            'unselectable': 'on'}).
+              text(i).appendTo($('#viewport'));
+        }
 
-      $('.viewport').xselectable({'filter': '.box', 'distance': 2});
+        $('.viewport').xselectable({'filter': '.box', 'distance': 2});
+      });
     });
   </script>
 </head>

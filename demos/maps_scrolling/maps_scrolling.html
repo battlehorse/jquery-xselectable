@@ -90,203 +90,217 @@
       cursor: pointer;
     }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-  <script src="../../xselectable.js"></script>
+  <!--
+    This file uses requirejs (http://requirejs.org/) to load dependencies,
+    including the xselectable plugin. See demos/basic/basic.html and
+    demos/basic/basic_norequirejs.html on how to use the xselectable plugin with and
+    without requirejs.
+  -->
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+  <script type="text/javascript" src="../../lib/require.js"></script>
   <script type="text/javascript">
-    $().ready(function() {
+    require.config({
+      baseUrl: '../../',
+      paths: {
+        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min'
+      },
+      priority: ['jquery']
+    });
+    require(['jquery', 'xselectable'], function($) {
 
-      // Define a map overlay that will contain the markers added by the
-      // user to the map. We use a custom overlay to be able to use our own
-      // <div /> tags for markers, so we can make them selectable.
-      function SelectablesOverlay(map) {
-        this.markers_ = [];
-        this.protoMarker_ = $('<div />', {'class': 'marker'});
-        this.setMap(map);
-      }
-      SelectablesOverlay.prototype = new google.maps.OverlayView();
+      $().ready(function() {
 
-      // Adds a marker to the overlay.
-      SelectablesOverlay.prototype.addMarker = function(latlng, address) {
-        var marker = this.protoMarker_.clone().
-          data({'latlng': latlng, 'address': address});
-        this.markers_.push(marker);
-        this.getPanes().overlayLayer.appendChild(marker.get(0));
-      }
-
-      // Draws all the markers on the overlay, converting each latlng
-      // position into the correct pixel coordinates.
-      SelectablesOverlay.prototype.draw = function() {
-        var overlayProjection = this.getProjection();
-
-        for (var i = 0; i < this.markers_.length; i++) {
-          var latlng = this.markers_[i].data('latlng');
-          var pos = overlayProjection.fromLatLngToDivPixel(latlng);
-          this.markers_[i].css({'top': pos.y, 'left': pos.x});
+        // Define a map overlay that will contain the markers added by the
+        // user to the map. We use a custom overlay to be able to use our own
+        // <div /> tags for markers, so we can make them selectable.
+        function SelectablesOverlay(map) {
+          this.markers_ = [];
+          this.protoMarker_ = $('<div />', {'class': 'marker'});
+          this.setMap(map);
         }
-      };
+        SelectablesOverlay.prototype = new google.maps.OverlayView();
 
-      // Initialize the Google Map.
-      var latlng = new google.maps.LatLng(51.516, -0.111);  // London
-      var mapOpts = {
-        zoom: 4,
-        center: latlng,
-        mapTypeId: google.maps.MapTypeId.TERRAIN,
-        streetViewControl: false,
-        mapTypeControl: false
-      };
-      var map = new google.maps.Map(document.getElementById("map_canvas"), mapOpts);
-      var overlay = new SelectablesOverlay(map);
+        // Adds a marker to the overlay.
+        SelectablesOverlay.prototype.addMarker = function(latlng, address) {
+          var marker = this.protoMarker_.clone().
+            data({'latlng': latlng, 'address': address});
+          this.markers_.push(marker);
+          this.getPanes().overlayLayer.appendChild(marker.get(0));
+        }
 
-      // Make the map selectable.
-      $('#map_canvas').xselectable({
+        // Draws all the markers on the overlay, converting each latlng
+        // position into the correct pixel coordinates.
+        SelectablesOverlay.prototype.draw = function() {
+          var overlayProjection = this.getProjection();
 
-          // Selection is initially disabled.
-          disabled: true,
-
-          // Make all map markers selectable
-          filter: '.marker',
-
-          // Define a custom scroller that will work together with the
-          // underyling Google Map
-          scroller: function(el) {
-            var offset = {
-              'top' : 0,
-              'left': 0
-            };
-
-            return {
-
-              // The map is scrollable limitless in all directions
-              getScrollableDistances: function() {
-                return [
-                  Number.MAX_VALUE, Number.MAX_VALUE,
-                  Number.MAX_VALUE, Number.MAX_VALUE
-                ];
-              },
-
-              // Scroll the underlying map when a scroll request is received.
-              scroll: function(axis, shift) {
-                if (axis == 'vertical') {
-                  map.panBy(0, shift);
-                  offset.top -= shift;
-                } else {
-                  map.panBy(shift, 0);
-                  offset.left -= shift;
-                }
-              },
-
-              // Keep track of how far we have scrolled, so that overlaps
-              // between the selection box and selectable markers can be
-              // computed accordingly.
-              getScrollOffset: function() {
-                return offset;
-              }
-            }
-          },
-
-          // Define a custom positioner. Returns the correct pixel positions
-          // of selectable markers, with respect to the current map projection.
-          positioner: function(el) {
-            var pos = overlay.getProjection().fromLatLngToContainerPixel(
-              $(el).data('latlng'));
-            return {
-              'top': pos.y - 37,  // 37=vertical offset of the marker icon
-                                  //    to have it point to the exact latlng
-                                  //    coordinate the marker points to
-              'left': pos.x - 16,  // 16=horizontal offset of the marker icon
-                                   //    to have it point to the exact latlng
-                                   //    coordinate the marker points to
-              'width': el.offsetWidth,
-              'height': el.offsetHeight
-            }
+          for (var i = 0; i < this.markers_.length; i++) {
+            var latlng = this.markers_[i].data('latlng');
+            var pos = overlayProjection.fromLatLngToDivPixel(latlng);
+            this.markers_[i].css({'top': pos.y, 'left': pos.x});
           }
-
-      // Bind a few events to keep track of selected items.
-      }).bind('xselectablestart', function() {
-        $('#selectedList').children().remove();
-      }).bind('xselectableselecting', function(ev, ui) {
-        var li = $('<li />').text($(ui.selecting).data('address')).appendTo(
-          $('#selectedList'));
-        $(ui.selecting).data('listItem', li);
-      }).bind('xselectableunselecting', function(ev, ui) {
-        $(ui.unselecting).data('listItem').remove();
-      });
-
-      // Add a button onto the map to switch between panning and selection mode.
-      var mapControl = $(
-        '<div />', {'class': 'mapControl'}).
-        append($('<input type="button" class="btn danger" value="Start Selecting" />').
-          click(function() {
-
-            // Toggle between selection and panning mode.
-            var selectionState = $('#map_canvas').xselectable('option', 'disabled');
-            $('#map_canvas').
-              xselectable('option', 'disabled', !selectionState).
-              toggleClass('toggled');
-            map.setOptions({'draggable': !selectionState});
-
-            // Update the button text
-            if ($(this).val() == 'Start Selecting') {
-              $(this).val('Stop Selecting');
-            } else {
-              $(this).val('Start Selecting');
-            }
-          })).appendTo($('#map_canvas'));
-
-      // Let the user add markers to the map based on addresses of his choice.
-      var geocoder = new google.maps.Geocoder();
-      $('#geocode').submit(function(evt) {
-        geocoder.geocode({ 'address': $('#address').val()}, function(results, status) {
-          if (status == google.maps.GeocoderStatus.OK) {
-            overlay.addMarker(
-                results[0].geometry.location,
-                results[0].formatted_address);
-            map.setCenter(results[0].geometry.location);
-            overlay.draw();
-            $('#address').val('');
-          } else {
-            alert("Geocode was not successful for the following reason: " + status);
-          }
-        });
-        evt.preventDefault();
-      });
-
-      // Let the user add random markers to the map.
-      $('#add_random').click(function(evt) {
-        var centroid = {
-          lat: Math.random() * 120 - 60,
-          lng: Math.random() * 360 - 180
-        }, sw = {
-          lat: Number.MAX_VALUE,
-          lng: Number.MAX_VALUE
-        }, ne = {
-          lat: Number.MIN_VALUE,
-          lng: Number.MIN_VALUE
         };
 
-        for (var i = 0; i < 10; i++) {
-          var lat = centroid.lat + Math.random()*20;
-          var lng = centroid.lng + Math.random()*30;
+        // Initialize the Google Map.
+        var latlng = new google.maps.LatLng(51.516, -0.111);  // London
+        var mapOpts = {
+          zoom: 4,
+          center: latlng,
+          mapTypeId: google.maps.MapTypeId.TERRAIN,
+          streetViewControl: false,
+          mapTypeControl: false
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"), mapOpts);
+        var overlay = new SelectablesOverlay(map);
 
-          sw.lat = Math.min(sw.lat, lat);
-          sw.lng = Math.min(sw.lng, lng);
+        // Make the map selectable.
+        $('#map_canvas').xselectable({
 
-          ne.lat = Math.max(ne.lat, lat);
-          ne.lng = Math.max(ne.lng, lng);
+            // Selection is initially disabled.
+            disabled: true,
 
-          overlay.addMarker(
-            new google.maps.LatLng(lat, lng),
-            "Lat: " + lat.toFixed(2) + ", Lng: " + lng.toFixed(2));
-        }
-        map.fitBounds(new google.maps.LatLngBounds(
-            new google.maps.LatLng(sw.lat, sw.lng),
-            new google.maps.LatLng(ne.lat, ne.lng)
-        ));
-        overlay.draw();
-        evt.preventDefault();
+            // Make all map markers selectable
+            filter: '.marker',
+
+            // Define a custom scroller that will work together with the
+            // underyling Google Map
+            scroller: function(el) {
+              var offset = {
+                'top' : 0,
+                'left': 0
+              };
+
+              return {
+
+                // The map is scrollable limitless in all directions
+                getScrollableDistances: function() {
+                  return [
+                    Number.MAX_VALUE, Number.MAX_VALUE,
+                    Number.MAX_VALUE, Number.MAX_VALUE
+                  ];
+                },
+
+                // Scroll the underlying map when a scroll request is received.
+                scroll: function(axis, shift) {
+                  if (axis == 'vertical') {
+                    map.panBy(0, shift);
+                    offset.top -= shift;
+                  } else {
+                    map.panBy(shift, 0);
+                    offset.left -= shift;
+                  }
+                },
+
+                // Keep track of how far we have scrolled, so that overlaps
+                // between the selection box and selectable markers can be
+                // computed accordingly.
+                getScrollOffset: function() {
+                  return offset;
+                }
+              }
+            },
+
+            // Define a custom positioner. Returns the correct pixel positions
+            // of selectable markers, with respect to the current map projection.
+            positioner: function(el) {
+              var pos = overlay.getProjection().fromLatLngToContainerPixel(
+                $(el).data('latlng'));
+              return {
+                'top': pos.y - 37,  // 37=vertical offset of the marker icon
+                                    //    to have it point to the exact latlng
+                                    //    coordinate the marker points to
+                'left': pos.x - 16,  // 16=horizontal offset of the marker icon
+                                     //    to have it point to the exact latlng
+                                     //    coordinate the marker points to
+                'width': el.offsetWidth,
+                'height': el.offsetHeight
+              }
+            }
+
+        // Bind a few events to keep track of selected items.
+        }).bind('xselectablestart', function() {
+          $('#selectedList').children().remove();
+        }).bind('xselectableselecting', function(ev, ui) {
+          var li = $('<li />').text($(ui.selecting).data('address')).appendTo(
+            $('#selectedList'));
+          $(ui.selecting).data('listItem', li);
+        }).bind('xselectableunselecting', function(ev, ui) {
+          $(ui.unselecting).data('listItem').remove();
+        });
+
+        // Add a button onto the map to switch between panning and selection mode.
+        var mapControl = $(
+          '<div />', {'class': 'mapControl'}).
+          append($('<input type="button" class="btn danger" value="Start Selecting" />').
+            click(function() {
+
+              // Toggle between selection and panning mode.
+              var selectionState = $('#map_canvas').xselectable('option', 'disabled');
+              $('#map_canvas').
+                xselectable('option', 'disabled', !selectionState).
+                toggleClass('toggled');
+              map.setOptions({'draggable': !selectionState});
+
+              // Update the button text
+              if ($(this).val() == 'Start Selecting') {
+                $(this).val('Stop Selecting');
+              } else {
+                $(this).val('Start Selecting');
+              }
+            })).appendTo($('#map_canvas'));
+
+        // Let the user add markers to the map based on addresses of his choice.
+        var geocoder = new google.maps.Geocoder();
+        $('#geocode').submit(function(evt) {
+          geocoder.geocode({ 'address': $('#address').val()}, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+              overlay.addMarker(
+                  results[0].geometry.location,
+                  results[0].formatted_address);
+              map.setCenter(results[0].geometry.location);
+              overlay.draw();
+              $('#address').val('');
+            } else {
+              alert("Geocode was not successful for the following reason: " + status);
+            }
+          });
+          evt.preventDefault();
+        });
+
+        // Let the user add random markers to the map.
+        $('#add_random').click(function(evt) {
+          var centroid = {
+            lat: Math.random() * 120 - 60,
+            lng: Math.random() * 360 - 180
+          }, sw = {
+            lat: Number.MAX_VALUE,
+            lng: Number.MAX_VALUE
+          }, ne = {
+            lat: Number.MIN_VALUE,
+            lng: Number.MIN_VALUE
+          };
+
+          for (var i = 0; i < 10; i++) {
+            var lat = centroid.lat + Math.random()*20;
+            var lng = centroid.lng + Math.random()*30;
+
+            sw.lat = Math.min(sw.lat, lat);
+            sw.lng = Math.min(sw.lng, lng);
+
+            ne.lat = Math.max(ne.lat, lat);
+            ne.lng = Math.max(ne.lng, lng);
+
+            overlay.addMarker(
+              new google.maps.LatLng(lat, lng),
+              "Lat: " + lat.toFixed(2) + ", Lng: " + lng.toFixed(2));
+          }
+          map.fitBounds(new google.maps.LatLngBounds(
+              new google.maps.LatLng(sw.lat, sw.lng),
+              new google.maps.LatLng(ne.lat, ne.lng)
+          ));
+          overlay.draw();
+          evt.preventDefault();
+        });
       });
-
     });
   </script>
 </head>

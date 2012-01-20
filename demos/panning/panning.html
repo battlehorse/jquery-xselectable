@@ -59,76 +59,90 @@
       cursor: pointer;
     }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-  <script src="../../xselectable.js"></script>
-  <script type="text/javascript" charset="utf-8">
-    $().ready(function() {
+  <!--
+    This file uses requirejs (http://requirejs.org/) to load dependencies,
+    including the xselectable plugin. See demos/basic/basic.html and
+    demos/basic/basic_norequirejs.html on how to use the xselectable plugin with and
+    without requirejs.
+  -->
+  <script type="text/javascript" src="../../lib/require.js"></script>
+  <script type="text/javascript">
+    require.config({
+      baseUrl: '../../',
+      paths: {
+        jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min'
+      },
+      priority: ['jquery']
+    });
+    require(['jquery', 'xselectable'], function($) {
+      $().ready(function() {
 
-      // Fill the selectable container with 50x50 blocks, each one showing a
-      // chunk of the background image.
-      var width = $('#universe').width(),
-          height = $('#universe').height();
-      var x = 0, y = 0, side = 50;
-      while (y < height) {
-        var box = $('<div />', {'id': 'box_' + x + '_' + y, 'class': 'box'}).css({
-          'position': 'absolute',
-          'top': y + 'px',
-          'left': x + 'px',
-          'background-position': '' + (-x) + 'px ' + (-y) + 'px'
-        }).appendTo($('#universe'));
-        if (x + side >= width) {
-          x = 0;
-          y += side;
-        } else {
-          x += side;
+        // Fill the selectable container with 50x50 blocks, each one showing a
+        // chunk of the background image.
+        var width = $('#universe').width(),
+            height = $('#universe').height();
+        var x = 0, y = 0, side = 50;
+        while (y < height) {
+          var box = $('<div />', {'id': 'box_' + x + '_' + y, 'class': 'box'}).css({
+            'position': 'absolute',
+            'top': y + 'px',
+            'left': x + 'px',
+            'background-position': '' + (-x) + 'px ' + (-y) + 'px'
+          }).appendTo($('#universe'));
+          if (x + side >= width) {
+            x = 0;
+            y += side;
+          } else {
+            x += side;
+          }
         }
-      }
 
-      // Compute the available scrolling distance in each direction, based
-      // one the dimension of the background image and the dimension of the
-      // container viewport.
-      var available = {
-        'top' : 0,
-        'left': 0,
-        'bottom': 500,
-        'right': $('#universe').width() - $('#viewport').width()
-      };
+        // Compute the available scrolling distance in each direction, based
+        // one the dimension of the background image and the dimension of the
+        // container viewport.
+        var available = {
+          'top' : 0,
+          'left': 0,
+          'bottom': 500,
+          'right': $('#universe').width() - $('#viewport').width()
+        };
 
-      // Activate the selectable plugin, along with a custom scroller that
-      // pans the background image accordingly when scrolling is required.
-      $('.viewport').xselectable({
-        'filter': '.box',
-        'distance': 2,
-        'scroller': function(el) {
+        // Activate the selectable plugin, along with a custom scroller that
+        // pans the background image accordingly when scrolling is required.
+        $('.viewport').xselectable({
+          'filter': '.box',
+          'distance': 2,
+          'scroller': function(el) {
 
-          return {
-            getScrollableDistances: function() {
-              return [
-                available.top, available.right, available.bottom, available.left
-              ];
-            },
-            scroll: function(axis, shift) {
-              // shift is negative when scrolling top (content must shift bottom)
-              if (axis == 'vertical') {
-                $('#universe').css('top',
-                  parseInt($('#universe').css('top'), 10) - shift);
-                available.bottom -= shift;
-                available.top += shift;
-              } else if (axis == 'horizontal') {
-                $('#universe').css('left',
-                  parseInt($('#universe').css('left'), 10) - shift);
-                available.right -= shift;
-                available.left += shift;
+            return {
+              getScrollableDistances: function() {
+                return [
+                  available.top, available.right, available.bottom, available.left
+                ];
+              },
+              scroll: function(axis, shift) {
+                // shift is negative when scrolling top (content must shift bottom)
+                if (axis == 'vertical') {
+                  $('#universe').css('top',
+                    parseInt($('#universe').css('top'), 10) - shift);
+                  available.bottom -= shift;
+                  available.top += shift;
+                } else if (axis == 'horizontal') {
+                  $('#universe').css('left',
+                    parseInt($('#universe').css('left'), 10) - shift);
+                  available.right -= shift;
+                  available.left += shift;
+                }
+              },
+              getScrollOffset: function() {
+                return {
+                  top: parseInt($('#universe').css('top'), 10),
+                  left: parseInt($('#universe').css('left'), 10)
+                };
               }
-            },
-            getScrollOffset: function() {
-              return {
-                top: parseInt($('#universe').css('top'), 10),
-                left: parseInt($('#universe').css('left'), 10)
-              };
-            }
-          };
-        }
+            };
+          }
+        });
       });
     });
   </script>

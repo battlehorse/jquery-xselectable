@@ -246,6 +246,37 @@
             </ul>
           </div>
         </div>
+        <div class="row">
+          <div class="span8">
+            <h4>Which plugin source file to include?</h4>
+            <ul>
+              <li><code>xselectable.min.js</code>: self-contained, minified
+                version of the plugin. This is the <strong>recommended</strong>
+                file for production use.</li>
+              <li><code>xselectable.js</code>: plain, not-minified and
+                commented version of the plugin. Useful for debugging.
+              </li>
+            </ul>
+          </div>
+          <div class="span8">
+            <h4>Usage with <code>require.js</code></h4>
+            <p>
+              jQuery-xselectable is automatically exported as a
+              <a href="http://requirejs.org/">require.js</a> module, if
+              your project uses require.js, just add the <code>xselectable</code>
+              dependency to your requirements:
+            </p>
+            <pre class="prettyprint">
+require(['jquery', 'xselectable'], function($) {
+   // Use the xselectable plugin here.       
+});</pre>
+            <p>
+              See the <a href="demos/basic/basic.html" target="_blank">basic.html</a>
+              demo for sample code.
+            </p>
+
+          </div>
+        </div>
       </section>
 
       <section id="features">
@@ -662,6 +693,12 @@ $('#container').xselectable().bind(
             <p>
               Open in a separate window:
               <a href="demos/basic/basic.html" target="_blank">basic.html</a>
+            </p>
+            <p>
+              Demo variants exist to demonstrate how to load the plugin
+              <a href="demos/basic/basic.html" target="_blank">with</a> and
+              <a href="demos/basic/basic_norequirejs.html" target="_blank">without</a>
+              depending on <a href="http://requirejs.org/">require.js</a>.
             </p>
           </div>
         </div>
